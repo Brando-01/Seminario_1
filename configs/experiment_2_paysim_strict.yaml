@@ -1,0 +1,21 @@
+{
+  "experiment": {"name": "experiment_2_paysim_strict", "dataset": "paysim", "variant": "strict_without_balances"},
+  "data": {
+    "path": "data/raw/paysim/PS_20174392719_1491204439457_log.csv",
+    "fallback_path": "../PS_20174392719_1491204439457_log.csv/PS_20174392719_1491204439457_log.csv",
+    "target": "isFraud",
+    "time_column": "step",
+    "total_rows": 6362620,
+    "development_window": {"min": 400, "max": 743},
+    "exclude_balance_columns": true,
+    "exclude_flagged_fraud": true,
+    "add_causal_history_features": false,
+    "add_balance_consistency_features": false,
+    "missing_threshold": 0.95,
+    "exclude_features": ["step", "isFraud", "isFlaggedFraud", "nameOrig", "nameDest", "_time_seconds"]
+  },
+  "split": {"method": "temporal", "train": 0.70, "validation": 0.15, "test": 0.15},
+  "graph": {"entity_groups": [["nameOrig", "nameDest"]], "time_window_hours": 72, "max_previous_neighbors": 3},
+  "model": {"hidden_dimension": 128, "latent_dimension": 32, "gnn_layers": 2, "dropout": 0.30},
+  "training": {"epochs": 100, "batch_size": 1024, "learning_rate": 0.001, "weight_decay": 0.0001, "reconstruction_weight": 0.10, "early_stopping_patience": 10, "max_false_positives_per_1000": 10, "seed": 42}
+}

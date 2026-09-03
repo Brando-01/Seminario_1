@@ -1,0 +1,22 @@
+{
+  "experiment": {"name": "experiment_1_ieee", "dataset": "ieee_cis"},
+  "data": {
+    "transaction_path": "data/raw/ieee_cis/train_transaction.csv",
+    "identity_path": "data/raw/ieee_cis/train_identity.csv",
+    "fallback_transaction_path": "../ieee-fraud-detection/train_transaction.csv",
+    "fallback_identity_path": "../ieee-fraud-detection/train_identity.csv",
+    "target": "isFraud",
+    "time_column": "TransactionDT",
+    "total_rows": 590540,
+    "missing_threshold": 0.95,
+    "exclude_features": ["TransactionID", "TransactionDT", "isFraud", "card_proxy", "card_email_proxy", "device_proxy"]
+  },
+  "split": {"method": "temporal", "train": 0.70, "validation": 0.15, "test": 0.15},
+  "graph": {
+    "entity_groups": [["card_proxy"], ["card_email_proxy"], ["device_proxy"]],
+    "time_window_hours": 72,
+    "max_previous_neighbors": 3
+  },
+  "model": {"hidden_dimension": 128, "latent_dimension": 32, "gnn_layers": 2, "dropout": 0.30},
+  "training": {"epochs": 100, "batch_size": 1024, "learning_rate": 0.001, "weight_decay": 0.0001, "reconstruction_weight": 0.10, "early_stopping_patience": 10, "max_false_positives_per_1000": 10, "seed": 42}
+}
