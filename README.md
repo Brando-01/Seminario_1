@@ -1,5 +1,19 @@
 # Deteccion de fraude con GNN y Autoencoder
 
+## Evaluacion actual: protocolo v2
+
+Para comparar ambos datasets con ventanas temporales completas, tres semillas y resultados aislados:
+
+```powershell
+python -m pytest -q
+python validate_experiments.py --epochs 30 --seeds 42 52 62
+python show_results.py --validation-run latest --details
+```
+
+Consultar [VALIDACION_V2.md](VALIDACION_V2.md) para el protocolo, limites y archivos de evidencia. Esta ruta excluye los saldos posteriores de PaySim, evita historial entre operaciones del mismo instante y selecciona las redes supervisadas por AP de validacion. No ejecuta la totalidad de los datasets ni demuestra superioridad estadistica. Los comandos de abajo se conservan para los experimentos anteriores.
+
+## Implementacion
+
 Implementacion experimental para comparar cuatro enfoques de deteccion de fraude:
 
 1. Baseline tabular supervisado.
@@ -9,7 +23,7 @@ Implementacion experimental para comparar cuatro enfoques de deteccion de fraude
 
 Se ejecutan dos experimentos independientes. IEEE-CIS usa entidades inferidas (tarjeta, correo y dispositivo); PaySim usa las cuentas de origen y destino. Los datasets no se mezclan y las conclusiones se obtienen dentro de cada uno.
 
-PaySim incluye dos variantes para una ablacion transparente: la principal usa los cuatro saldos brutos disponibles en la transaccion y variables historicas causales; la variante `strict` excluye completamente los saldos. Ninguna usa `isFlaggedFraud` ni los errores de consistencia que delatan el simulador.
+Las configuraciones antiguas de PaySim incluyen una variante con cuatro saldos e historial y otra `strict` sin saldos. No deben confundirse con el protocolo v2 ni interpretarse como una ablacion controlada si cambian otras variables a la vez. Ninguna de esas configuraciones usa `isFlaggedFraud` ni errores de consistencia.
 
 ## Estructura principal
 
@@ -28,7 +42,40 @@ fraud_detection_gnn_ae/
 
 ## Instalacion
 
-Desde la raiz del proyecto:
+Para instalar en otra computadora, necesitas Git, Python 3.12 de 64 bits (la serie utilizada en la validacion local), conexion para descargar las dependencias y los CSV originales. Los modelos pueden ejecutarse en CPU; una GPU no es obligatoria. El consumo de memoria y el tiempo dependen de la ventana de datos y del equipo.
+
+En PowerShell:
+
+```powershell
+git clone https://github.com/Brando-01/Seminario_1.git
+cd Seminario_1
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+New-Item -ItemType Directory -Force -Path data\raw\ieee_cis,data\raw\paysim | Out-Null
+```
+
+Copia los archivos descomprimidos a estas rutas:
+
+```text
+data/raw/ieee_cis/train_transaction.csv
+data/raw/ieee_cis/train_identity.csv
+data/raw/paysim/PS_20174392719_1491204439457_log.csv
+```
+
+Estos tres archivos bastan para la evaluacion v2. Los archivos test y sample_submission de Kaggle no son necesarios para ese comando. Debes aportar los CSV por separado: los datos, `.venv`, `outputs` y los pesos de redes no estan incluidos en Git.
+
+Sin activar el entorno ni cambiar la politica de PowerShell, puedes ejecutar:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q
+.\.venv\Scripts\python.exe validate_experiments.py --epochs 30 --seeds 42 52 62
+.\.venv\Scripts\python.exe show_results.py --validation-run latest --details
+.\.venv\Scripts\python.exe audit_validation.py --run latest
+```
+
+Las pruebas no requieren los datasets. El entrenamiento si los requiere. El visor y la auditoria requieren una corrida terminada en `outputs`; en un clon nuevo, primero hay que entrenar. El resumen historico se puede leer sin entrenar en `RESULTADOS_VALIDACION_V2.md`. Las dependencias de `requirements.txt` tienen limites minimos, no versiones fijadas: los resultados pueden variar entre versiones y equipos.
+
+Alternativamente, desde la raiz del proyecto puedes activar el entorno:
 
 ```powershell
 python -m venv .venv
@@ -50,7 +97,7 @@ Set-ExecutionPolicy -Scope Process Bypass
 .\project.ps1 validate
 ```
 
-El resultado esperado es `7 passed`.
+La suite actual contiene 15 pruebas.
 
 ### 2. Explorar los datos
 

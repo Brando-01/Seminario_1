@@ -10,6 +10,38 @@ from src.graph.temporal_graph import build_temporal_entity_graph
 
 
 class DataPipelineTests(unittest.TestCase):
+    def test_split_keeps_timestamp_ties_together(self):
+        frame = pd.DataFrame({'time': [1]*4 + [2]*3 + [3]*3 + [4]*2})
+        result = temporal_split(frame, 'time', .5, .25)
+        self.assertLess(result.train.time.max(), result.validation.time.min())
+        self.assertLess(result.validation.time.max(), result.test.time.min())
+        self.assertEqual(sum(map(len, [result.train, result.validation, result.test])), len(frame))
+
+    def test_explicit_temporal_boundaries(self):
+        frame = pd.DataFrame({'time': [1, 2, 2, 3, 4, 5]})
+        result = temporal_split(frame, 'time', .7, .15, 3, 5)
+        self.assertEqual(result.train.time.tolist(), [1, 2, 2])
+        self.assertEqual(result.validation.time.tolist(), [3, 4])
+        self.assertEqual(result.test.time.tolist(), [5])
+
+    def test_graph_excludes_ties_and_keeps_bounded_past(self):
+        frame = pd.DataFrame({'time': [1, 2, 2, 3], 'entity': ['A']*4})
+        graph = build_temporal_entity_graph(frame, 'time', [['entity']], 100, 1)
+        self.assertEqual(set(map(tuple, graph.edge_index.T.tolist())), {(0, 1), (0, 2), (2, 3)})
+
+    def test_history_cannot_observe_same_step(self):
+        frame = pd.DataFrame({'step': [1, 2, 2, 3], 'amount': [10., 20., 900., 5.], 'nameOrig': ['A']*4, 'nameDest': ['B']*4})
+        result = add_paysim_causal_features(frame)
+        np.testing.assert_allclose(result.origin_previous_amount_sum_log1p, np.log1p([0, 10, 10, 930]))
+        np.testing.assert_allclose(result.origin_previous_count_log1p, np.log1p([0, 1, 1, 3]))
+
+    def test_log_scaling_handles_infinite_and_extreme_values(self):
+        processor = TabularPreprocessor(set(), log_columns=('amount',), clip_value=3.)
+        processor.fit(pd.DataFrame({'amount': [0., 1., 2.]}))
+        result = processor.transform(pd.DataFrame({'amount': [np.inf, -np.inf, 1e30]}))
+        self.assertTrue(np.isfinite(result).all())
+        self.assertLessEqual(float(np.abs(result).max()), 3.)
+
     def test_temporal_split_preserves_order(self):
         frame = pd.DataFrame({"time": [5, 1, 4, 2, 3], "label": [0, 1, 0, 1, 0]})
         result = temporal_split(frame, "time", 0.6, 0.2)
@@ -56,3 +88,12 @@ class DataPipelineTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_window_without_row_limit_does_not_load_outside_period(tmp_path):
+    from src.data.loaders import _read_csv
+
+    path = tmp_path / 'example.csv'
+    pd.DataFrame({'step': [1, 2, 3, 4, 5]}).to_csv(path, index=False)
+    result = _read_csv(path, None, 'window', 5, 42, 'step', {'min': 2, 'max': 4})
+    assert result.step.tolist() == [2, 3, 4]

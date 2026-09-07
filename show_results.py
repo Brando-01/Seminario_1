@@ -153,7 +153,33 @@ def main() -> None:
     parser.add_argument("--experiment", choices=[*EXPERIMENTS, "all"], default="all")
     parser.add_argument("--details", action="store_true")
     parser.add_argument("--aggregate-seeds", action="store_true")
+    parser.add_argument("--validation-run", help="Nombre de carpeta validation_v2_... o latest; no mezcla corridas antiguas")
     args = parser.parse_args()
+    if args.validation_run:
+        if args.validation_run == "latest":
+            candidates = sorted((ROOT / "outputs").glob("validation_v2_*"))
+            if not candidates:
+                parser.error("No hay corridas validation_v2")
+            directory = candidates[-1]
+        else:
+            directory = ROOT / "outputs" / args.validation_run
+        report = directory / "REPORT.md"
+        print(f"Corrida: {directory}")
+        if report.is_file():
+            print(report.read_text(encoding="utf-8"))
+        else:
+            print("CORRIDA INCOMPLETA: no hay informe final. Revisar terminal de entrenamiento.")
+        results_file = directory / "results.json"
+        if results_file.is_file() and (args.details or not report.is_file()):
+            rows = json.loads(results_file.read_text(encoding="utf-8"))
+            print("\nDetalle: umbral operativo elegido en validacion, evaluado en test")
+            print(f"{'Dataset':<10}{'Semilla':<9}{'Modelo':<15}{'AP':>9}{'Recall':>10}{'FP/1000':>10}")
+            for row in rows:
+                op = row['operating_metrics']
+                print(f"{row['dataset']:<10}{row['seed']:<9}{row['model']:<15}{row['metrics']['auc_pr']:>9.4f}{op['recall']:>10.4f}{op['false_positives_per_1000']:>10.2f}")
+        if not report.is_file():
+            raise SystemExit(1)
+        return
     keys = MAIN_EXPERIMENTS if args.experiment == "all" else [args.experiment]
     found = False
     for key in keys:

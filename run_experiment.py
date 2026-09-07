@@ -50,11 +50,11 @@ def save_json(path: Path, payload: Any) -> None:
 def prepare_experiment(config: dict, max_rows: int | None, sample_mode: str = "prefix") -> PreparedExperiment:
     bundle = load_dataset(config, PROJECT_ROOT, max_rows, sample_mode)
     split_cfg = config["split"]
-    partitions = temporal_split(bundle.frame, bundle.time_column, split_cfg["train"], split_cfg["validation"])
+    partitions = temporal_split(bundle.frame, bundle.time_column, split_cfg["train"], split_cfg["validation"], split_cfg.get("train_before"), split_cfg.get("test_from"))
     excluded = set(config["data"].get("exclude_features", []))
     excluded.update(bundle.metadata.get("excluded_from_features", []))
     excluded.add(bundle.target_column)
-    preprocessor = TabularPreprocessor(excluded, config["data"].get("missing_threshold", 0.95))
+    preprocessor = TabularPreprocessor(excluded, config["data"].get("missing_threshold", 0.95), tuple(config["data"].get("log_columns", [])), config["data"].get("clip_value"))
     features = {
         "train": preprocessor.fit_transform(partitions.train),
         "validation": preprocessor.transform(partitions.validation),
@@ -70,6 +70,9 @@ def prepare_experiment(config: dict, max_rows: int | None, sample_mode: str = "p
         "validation": partitions.validation[bundle.target_column].to_numpy(dtype=np.int64, copy=True),
         "test": partitions.test[bundle.target_column].to_numpy(dtype=np.int64, copy=True),
     }
+    for name, values in labels.items():
+        if set(np.unique(values)) != {0, 1}:
+            raise ValueError(f"{name} must contain both fraud and legitimate transactions; revise temporal coverage")
     graph_cfg = config["graph"]
     graph_frames = {
         "train": partitions.train,
@@ -91,7 +94,7 @@ def prepare_experiment(config: dict, max_rows: int | None, sample_mode: str = "p
         "raw_rows": int(len(bundle.frame)),
         "raw_columns": int(len(bundle.frame.columns)),
         "model_feature_count": int(features["train"].shape[1]),
-        "retained_feature_columns": preprocessor.feature_columns,
+        "retained_feature_columns": preprocessor.numeric_columns + preprocessor.categorical_columns,
         "splits": {
             "train": split_summary(partitions.train, bundle.target_column, bundle.time_column),
             "validation": split_summary(partitions.validation, bundle.target_column, bundle.time_column),
@@ -108,6 +111,9 @@ def prepare_experiment(config: dict, max_rows: int | None, sample_mode: str = "p
         },
     }
     save_json(output_dir(config, "metrics") / "prepare_summary.json", summary)
+    import pickle
+    with (output_dir(config, "checkpoints") / "preprocessor.pkl").open("wb") as stream:
+        pickle.dump(preprocessor, stream)
     return PreparedExperiment(config, bundle, partitions, features, graph_features, labels, graphs, summary)
 
 
@@ -119,7 +125,7 @@ def run_baseline(prepared: PreparedExperiment) -> dict:
     model.fit(prepared.features["train"], prepared.labels["train"])
     validation_scores = model.predict_proba(prepared.features["validation"])
     test_scores = model.predict_proba(prepared.features["test"])
-    metrics, operating_metrics = evaluate_scores(prepared, validation_scores, test_scores)
+    metrics, operating_metrics = evaluate_scores(prepared, validation_scores, test_scores, "baseline")
     result = {"model": "tabular_baseline", "metrics": metrics, "operating_metrics": operating_metrics}
     save_json(output_dir(prepared.config, "metrics") / "baseline_metrics.json", result)
     return result
@@ -141,7 +147,7 @@ def torch_device():
     return torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def evaluate_scores(prepared: PreparedExperiment, validation_scores: np.ndarray, test_scores: np.ndarray) -> tuple[dict, dict]:
+def evaluate_scores(prepared: PreparedExperiment, validation_scores: np.ndarray, test_scores: np.ndarray, model_name: str) -> tuple[dict, dict]:
     from src.evaluation import classification_metrics, select_f1_threshold, select_threshold_at_fp_budget
 
     validation_labels = prepared.labels["validation"]
@@ -149,6 +155,7 @@ def evaluate_scores(prepared: PreparedExperiment, validation_scores: np.ndarray,
     f1_threshold = select_f1_threshold(validation_labels, validation_scores)
     budget = float(prepared.config["training"].get("max_false_positives_per_1000", 10))
     operating_threshold = select_threshold_at_fp_budget(validation_labels, validation_scores, budget)
+    np.savez_compressed(output_dir(prepared.config, "predictions") / f"{model_name}.npz", labels=test_labels, scores=test_scores, validation_labels=validation_labels, validation_scores=validation_scores, time=prepared.partitions.test[prepared.bundle.time_column].to_numpy(), threshold=f1_threshold)
     return (
         classification_metrics(test_labels, test_scores, f1_threshold),
         classification_metrics(test_labels, test_scores, operating_threshold),
@@ -167,14 +174,15 @@ def run_autoencoder(prepared: PreparedExperiment, epochs: int) -> dict:
     training_cfg = prepared.config["training"]
     set_global_seed(int(training_cfg["seed"]))
     model = Autoencoder(features["train"].shape[1], model_cfg["hidden_dimension"], model_cfg["latent_dimension"], model_cfg["dropout"]).to(device)
-    training = fit_autoencoder(model, features["train"], labels["train"], epochs, training_cfg["learning_rate"])
+    training = fit_autoencoder(model, features["train"], labels["train"], epochs, training_cfg["learning_rate"], features["validation"], labels["validation"], training_cfg["batch_size"], training_cfg["early_stopping_patience"])
     model.eval()
     with torch.no_grad():
         validation_reconstruction, _ = model(features["validation"])
         test_reconstruction, _ = model(features["test"])
         validation_scores = torch.mean(torch.abs(features["validation"] - validation_reconstruction), dim=1).cpu().numpy()
         test_scores = torch.mean(torch.abs(features["test"] - test_reconstruction), dim=1).cpu().numpy()
-    metrics, operating_metrics = evaluate_scores(prepared, validation_scores, test_scores)
+    metrics, operating_metrics = evaluate_scores(prepared, validation_scores, test_scores, "autoencoder")
+    save_json(output_dir(prepared.config, "metrics") / "autoencoder_history.json", training.history)
     torch.save(model.state_dict(), output_dir(prepared.config, "checkpoints") / "autoencoder.pt")
     result = {"model": "autoencoder", "training": {"best_epoch": training.best_epoch, "best_loss": training.best_validation_loss}, "metrics": metrics, "operating_metrics": operating_metrics}
     save_json(output_dir(prepared.config, "metrics") / "autoencoder_metrics.json", result)
@@ -200,7 +208,8 @@ def run_gnn(prepared: PreparedExperiment, epochs: int) -> dict:
         validation_scores = torch.sigmoid(model(features["validation"], edges["validation"])[validation_start:]).cpu().numpy()
         test_start = len(features["test"]) - len(labels["test"])
         test_scores = torch.sigmoid(model(features["test"], edges["test"])[test_start:]).cpu().numpy()
-    metrics, operating_metrics = evaluate_scores(prepared, validation_scores, test_scores)
+    metrics, operating_metrics = evaluate_scores(prepared, validation_scores, test_scores, "gnn")
+    save_json(output_dir(prepared.config, "metrics") / "gnn_history.json", training.history)
     torch.save(model.state_dict(), output_dir(prepared.config, "checkpoints") / "gnn.pt")
     result = {"model": "graphsage", "training": {"best_epoch": training.best_epoch, "best_loss": training.best_validation_loss}, "metrics": metrics, "operating_metrics": operating_metrics}
     save_json(output_dir(prepared.config, "metrics") / "gnn_metrics.json", result)
@@ -226,7 +235,8 @@ def run_hybrid(prepared: PreparedExperiment, epochs: int) -> dict:
         validation_scores = torch.sigmoid(model(features["validation"], edges["validation"])["logits"][validation_start:]).cpu().numpy()
         test_start = len(features["test"]) - len(labels["test"])
         test_scores = torch.sigmoid(model(features["test"], edges["test"])["logits"][test_start:]).cpu().numpy()
-    metrics, operating_metrics = evaluate_scores(prepared, validation_scores, test_scores)
+    metrics, operating_metrics = evaluate_scores(prepared, validation_scores, test_scores, "hybrid")
+    save_json(output_dir(prepared.config, "metrics") / "hybrid_history.json", training.history)
     torch.save(model.state_dict(), output_dir(prepared.config, "checkpoints") / "hybrid.pt")
     result = {"model": "hybrid_gnn_autoencoder", "training": {"best_epoch": training.best_epoch, "best_loss": training.best_validation_loss}, "metrics": metrics, "operating_metrics": operating_metrics}
     save_json(output_dir(prepared.config, "metrics") / "hybrid_metrics.json", result)

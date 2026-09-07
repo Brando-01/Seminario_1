@@ -11,16 +11,23 @@ BALANCE_COLUMNS = ["oldbalanceOrg", "newbalanceOrig", "oldbalanceDest", "newbala
 
 def add_paysim_causal_features(frame: pd.DataFrame, time_column: str = "step") -> pd.DataFrame:
     """Create row features using only the current transaction and earlier rows."""
-    enriched = frame.copy()
+    enriched = frame.sort_values(time_column, kind="stable").reset_index(drop=True).copy()
     amount = pd.to_numeric(enriched["amount"], errors="coerce").fillna(0.0).astype("float64")
     enriched["amount_log1p"] = np.log1p(amount.clip(lower=0))
     enriched["destination_is_merchant"] = enriched["nameDest"].astype("string").str.startswith("M", na=False).astype("int8")
     for role, entity_column in (("origin", "nameOrig"), ("destination", "nameDest")):
         grouped = enriched.groupby(entity_column, sort=False, dropna=False)
-        previous_count = grouped.cumcount().astype("int64")
-        previous_sum = grouped["amount"].cumsum().astype("float64") - amount
+        # Aggregate history by complete timestamp: ties cannot observe one another.
+        buckets = enriched.assign(_amount=amount).groupby([entity_column, time_column], sort=True, dropna=False).agg(_sum=("_amount", "sum"), _count=("_amount", "size")).reset_index()
+        accounts = buckets.groupby(entity_column, sort=False, dropna=False)
+        buckets["_previous_count"] = accounts["_count"].cumsum() - buckets["_count"]
+        buckets["_previous_sum"] = accounts["_sum"].cumsum() - buckets["_sum"]
+        buckets["_recency"] = accounts[time_column].diff().fillna(-1)
+        history = enriched[[entity_column, time_column]].merge(buckets, on=[entity_column, time_column], how="left", validate="many_to_one")
+        previous_count = history["_previous_count"].astype("int64")
+        previous_sum = history["_previous_sum"].astype("float64")
         previous_mean = previous_sum.div(previous_count.where(previous_count > 0)).fillna(0.0)
-        time_since_previous = grouped[time_column].diff().fillna(-1).clip(lower=-1)
+        time_since_previous = history["_recency"]
         enriched[f"{role}_previous_count_log1p"] = np.log1p(previous_count).astype("float32")
         enriched[f"{role}_previous_amount_sum_log1p"] = np.log1p(previous_sum.clip(lower=0)).astype("float32")
         enriched[f"{role}_previous_amount_mean_log1p"] = np.log1p(previous_mean.clip(lower=0)).astype("float32")
@@ -68,7 +75,7 @@ def _read_csv(
     time_column: str | None = None,
     development_window: dict | None = None,
 ) -> pd.DataFrame:
-    if max_rows is None:
+    if max_rows is None and sample_mode != "window":
         return pd.read_csv(path, low_memory=False)
     if sample_mode == "prefix":
         return pd.read_csv(path, nrows=max_rows, low_memory=False)
@@ -161,6 +168,8 @@ def load_paysim(config: dict, project_root: Path, max_rows: int | None = None, s
     dropped: list[str] = []
     if data_cfg.get("exclude_balance_columns", True):
         dropped.extend(c for c in BALANCE_COLUMNS if c in frame.columns)
+    elif data_cfg.get("exclude_post_transaction_balances", False):
+        dropped.extend(c for c in ("newbalanceOrig", "newbalanceDest") if c in frame.columns)
     if data_cfg.get("exclude_flagged_fraud", True) and "isFlaggedFraud" in frame.columns:
         dropped.append("isFlaggedFraud")
     hour = (frame[data_cfg["time_column"]].astype("int64") - 1) % 24

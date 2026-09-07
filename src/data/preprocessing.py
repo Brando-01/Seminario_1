@@ -10,6 +10,8 @@ class TabularPreprocessor:
 
     excluded_columns: set[str]
     missing_threshold: float = 0.95
+    log_columns: tuple = ()
+    clip_value: float | None = None
     feature_columns: list[str] = field(default_factory=list)
     numeric_columns: list[str] = field(default_factory=list)
     categorical_columns: list[str] = field(default_factory=list)
@@ -24,7 +26,9 @@ class TabularPreprocessor:
         self.numeric_columns = [c for c in self.feature_columns if pd.api.types.is_numeric_dtype(frame[c])]
         self.categorical_columns = [c for c in self.feature_columns if c not in self.numeric_columns]
         for column in self.numeric_columns:
-            values = pd.to_numeric(frame[column], errors="coerce")
+            values = pd.to_numeric(frame[column], errors="coerce").replace([np.inf, -np.inf], np.nan)
+            if column in self.log_columns:
+                values = np.sign(values) * np.log1p(np.abs(values))
             median = float(values.median()) if values.notna().any() else 0.0
             filled = values.fillna(median)
             mean = float(filled.mean())
@@ -42,8 +46,14 @@ class TabularPreprocessor:
             raise RuntimeError("Preprocessor must be fitted before transform")
         arrays: list[np.ndarray] = []
         for column in self.numeric_columns:
-            values = pd.to_numeric(frame[column], errors="coerce").fillna(self.medians[column])
-            arrays.append(((values.to_numpy(dtype=np.float32) - self.means[column]) / self.stds[column]).reshape(-1, 1))
+            values = pd.to_numeric(frame[column], errors="coerce").replace([np.inf, -np.inf], np.nan)
+            if column in self.log_columns:
+                values = np.sign(values) * np.log1p(np.abs(values))
+            values = values.fillna(self.medians[column])
+            scaled = (values.to_numpy(dtype=np.float32) - self.means[column]) / self.stds[column]
+            if self.clip_value is not None:
+                scaled = np.clip(scaled, -self.clip_value, self.clip_value)
+            arrays.append(scaled.reshape(-1, 1))
         for column in self.categorical_columns:
             values = frame[column].astype("string").fillna("__MISSING__")
             encoded = values.map(self.frequency_maps[column]).fillna(0.0).to_numpy(dtype=np.float32)
@@ -54,4 +64,3 @@ class TabularPreprocessor:
 
     def fit_transform(self, frame: pd.DataFrame) -> np.ndarray:
         return self.fit(frame).transform(frame)
-

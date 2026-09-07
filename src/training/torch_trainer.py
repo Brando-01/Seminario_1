@@ -2,6 +2,7 @@ from copy import deepcopy
 from dataclasses import dataclass
 
 import torch
+from sklearn.metrics import average_precision_score
 from torch.nn import functional as functional
 
 from .losses import hybrid_loss
@@ -21,19 +22,41 @@ def _positive_weight(labels: torch.Tensor, maximum: float | None = None) -> floa
     return min(weight, maximum) if maximum is not None else weight
 
 
-def fit_autoencoder(model, features: torch.Tensor, labels: torch.Tensor, epochs: int, learning_rate: float) -> TrainingResult:
+def fit_autoencoder(model, features: torch.Tensor, labels: torch.Tensor, epochs: int, learning_rate: float, validation_features=None, validation_labels=None, batch_size=1024, patience=10) -> TrainingResult:
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     normal = features[labels == 0]
+    if validation_features is None or validation_labels is None:
+        raise ValueError("Autoencoder requires a separate validation partition")
+    validation_normal = validation_features[validation_labels == 0]
+    if not len(normal) or not len(validation_normal):
+        raise ValueError("Normal transactions required in train and validation")
+    best_loss, best_epoch, stale = float("inf"), 0, 0
+    best_state = deepcopy(model.state_dict())
     history = []
     for epoch in range(epochs):
         model.train()
-        optimizer.zero_grad()
-        reconstruction, _ = model(normal)
-        loss = functional.mse_loss(reconstruction, normal)
-        loss.backward()
-        optimizer.step()
-        history.append({"epoch": float(epoch + 1), "training_loss": float(loss.detach())})
-    return TrainingResult(epochs, history[-1]["training_loss"], history)
+        total = 0.0
+        for indices in torch.randperm(len(normal), device=normal.device).split(batch_size):
+            batch = normal[indices]
+            optimizer.zero_grad()
+            reconstruction, _ = model(batch)
+            loss = functional.mse_loss(reconstruction, batch)
+            loss.backward()
+            optimizer.step()
+            total += float(loss.detach()) * len(batch)
+        model.eval()
+        with torch.no_grad():
+            val_loss = sum(float(functional.mse_loss(model(batch)[0], batch)) * len(batch) for batch in validation_normal.split(batch_size)) / len(validation_normal)
+        history.append({"epoch": epoch + 1, "training_loss": total / len(normal), "validation_loss": val_loss})
+        if val_loss < best_loss:
+            best_loss, best_epoch, stale = val_loss, epoch + 1, 0
+            best_state = deepcopy(model.state_dict())
+        else:
+            stale += 1
+        if stale >= patience:
+            break
+    model.load_state_dict(best_state)
+    return TrainingResult(best_epoch, best_loss, history)
 
 
 def fit_gnn(
@@ -55,6 +78,7 @@ def fit_gnn(
     positive_weight = torch.tensor([_positive_weight(train_labels, positive_weight_cap)], device=train_features.device, dtype=train_features.dtype)
     best_state = deepcopy(model.state_dict())
     best_loss = float("inf")
+    best_ap = -1.0
     best_epoch = 0
     stale_epochs = 0
     history: list[dict[str, float]] = []
@@ -71,7 +95,10 @@ def fit_gnn(
             validation_loss = functional.binary_cross_entropy_with_logits(validation_logits, validation_labels.float(), pos_weight=positive_weight)
         record = {"epoch": float(epoch), "training_loss": float(train_loss.detach()), "validation_loss": float(validation_loss.detach())}
         history.append(record)
-        if record["validation_loss"] < best_loss:
+        ap = float(average_precision_score(validation_labels.cpu().numpy(), validation_logits.detach().cpu().numpy()))
+        record["validation_ap"] = ap
+        if ap > best_ap:
+            best_ap = ap
             best_loss = record["validation_loss"]
             best_epoch = epoch
             best_state = deepcopy(model.state_dict())
@@ -104,6 +131,7 @@ def fit_hybrid(
     positive_weight = _positive_weight(train_labels, positive_weight_cap)
     best_state = deepcopy(model.state_dict())
     best_loss = float("inf")
+    best_ap = -1.0
     best_epoch = 0
     stale_epochs = 0
     history: list[dict[str, float]] = []
@@ -121,7 +149,10 @@ def fit_hybrid(
             validation_loss, _ = hybrid_loss(validation_outputs, validation_features[validation_start:], validation_labels, positive_weight, reconstruction_weight)
         record = {"epoch": float(epoch), "training_loss": float(train_loss.detach()), "validation_loss": float(validation_loss.detach())}
         history.append(record)
-        if record["validation_loss"] < best_loss:
+        ap = float(average_precision_score(validation_labels.cpu().numpy(), validation_outputs["logits"].detach().cpu().numpy()))
+        record["validation_ap"] = ap
+        if ap > best_ap:
+            best_ap = ap
             best_loss = record["validation_loss"]
             best_epoch = epoch
             best_state = deepcopy(model.state_dict())
