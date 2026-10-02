@@ -4,6 +4,8 @@ from pathlib import Path
 
 import numpy as np
 
+from validation_report import render_hybrid_search_report, render_validation_report
+
 
 ROOT = Path(__file__).resolve().parent
 EXPERIMENTS = {
@@ -152,9 +154,45 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Muestra e interpreta resultados de los experimentos")
     parser.add_argument("--experiment", choices=[*EXPERIMENTS, "all"], default="all")
     parser.add_argument("--details", action="store_true")
+    parser.add_argument("--show-variability", action="store_true", help="Muestra tambien la desviacion estandar entre semillas")
     parser.add_argument("--aggregate-seeds", action="store_true")
     parser.add_argument("--validation-run", help="Nombre de carpeta validation_v2_... o latest; no mezcla corridas antiguas")
+    parser.add_argument("--hybrid-search", help="Nombre de carpeta hybrid_search_... o latest")
     args = parser.parse_args()
+    if args.validation_run and args.hybrid_search:
+        parser.error("Use --validation-run o --hybrid-search, no ambos")
+    if args.hybrid_search:
+        if args.hybrid_search == "latest":
+            candidates = sorted((ROOT / "outputs").glob("hybrid_search_*"))
+            if not candidates:
+                parser.error("No hay exploraciones hybrid_search")
+            directory = candidates[-1]
+        else:
+            directory = ROOT / "outputs" / args.hybrid_search
+        datasets = {}
+        for dataset in ("ieee", "paysim"):
+            validation_file = directory / dataset / "candidate_validation.json"
+            test_file = directory / dataset / "selected_test.json"
+            if validation_file.is_file() and test_file.is_file():
+                datasets[dataset] = (
+                    json.loads(validation_file.read_text(encoding="utf-8")),
+                    json.loads(test_file.read_text(encoding="utf-8")),
+                )
+        if not datasets:
+            parser.error("No hay resultados completos de la exploracion seleccionada")
+        print(f"Corrida: {directory}")
+        print(render_hybrid_search_report(datasets, show_variability=args.show_variability))
+        if args.details:
+            print("Por semilla: AP en test y operacion al umbral fijado en validacion")
+            print(f"{'Dataset':<10}{'Semilla':<9}{'AP (%)':>10}{'Recall op. (%)':>17}{'FP/1000':>10}")
+            for dataset, (_, rows) in datasets.items():
+                for row in rows:
+                    print(
+                        f"{dataset:<10}{row['seed']:<9}{100 * row['metrics']['auc_pr']:>9.2f}%"
+                        f"{100 * row['operating_metrics']['recall']:>16.2f}%"
+                        f"{row['operating_metrics']['false_positives_per_1000']:>10.2f}"
+                    )
+        return
     if args.validation_run:
         if args.validation_run == "latest":
             candidates = sorted((ROOT / "outputs").glob("validation_v2_*"))
@@ -165,18 +203,30 @@ def main() -> None:
             directory = ROOT / "outputs" / args.validation_run
         report = directory / "REPORT.md"
         print(f"Corrida: {directory}")
-        if report.is_file():
+        results_file = directory / "results.json"
+        if report.is_file() and results_file.is_file():
+            rows = json.loads(results_file.read_text(encoding="utf-8"))
+            summaries = {}
+            for dataset in {row["dataset"] for row in rows}:
+                summary_file = directory / dataset / "prepared" / "metrics" / "prepare_summary.json"
+                if summary_file.is_file():
+                    summaries[dataset] = json.loads(summary_file.read_text(encoding="utf-8"))
+            print(render_validation_report(rows, summaries, show_variability=args.show_variability))
+            if args.details:
+                print("Detalle por semilla: AP en test; recall y FP/1000 al umbral operativo fijado en validacion")
+                print(f"{'Dataset':<10}{'Semilla':<9}{'Modelo':<15}{'AP (%)':>10}{'Recall (%)':>13}{'FP/1000':>10}")
+                for row in rows:
+                    op = row["operating_metrics"]
+                    print(
+                        f"{row['dataset']:<10}{row['seed']:<9}{row['model']:<15}"
+                        f"{100 * row['metrics']['auc_pr']:>9.2f}%"
+                        f"{100 * op['recall']:>12.2f}%"
+                        f"{op['false_positives_per_1000']:>10.2f}"
+                    )
+        elif report.is_file():
             print(report.read_text(encoding="utf-8"))
         else:
             print("CORRIDA INCOMPLETA: no hay informe final. Revisar terminal de entrenamiento.")
-        results_file = directory / "results.json"
-        if results_file.is_file() and (args.details or not report.is_file()):
-            rows = json.loads(results_file.read_text(encoding="utf-8"))
-            print("\nDetalle: umbral operativo elegido en validacion, evaluado en test")
-            print(f"{'Dataset':<10}{'Semilla':<9}{'Modelo':<15}{'AP':>9}{'Recall':>10}{'FP/1000':>10}")
-            for row in rows:
-                op = row['operating_metrics']
-                print(f"{row['dataset']:<10}{row['seed']:<9}{row['model']:<15}{row['metrics']['auc_pr']:>9.4f}{op['recall']:>10.4f}{op['false_positives_per_1000']:>10.2f}")
         if not report.is_file():
             raise SystemExit(1)
         return

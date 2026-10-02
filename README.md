@@ -12,6 +12,8 @@ python show_results.py --validation-run latest --details
 
 Consultar [VALIDACION_V2.md](VALIDACION_V2.md) para el protocolo, limites y archivos de evidencia. Esta ruta excluye los saldos posteriores de PaySim, evita historial entre operaciones del mismo instante y selecciona las redes supervisadas por AP de validacion. No ejecuta la totalidad de los datasets ni demuestra superioridad estadistica. Los comandos de abajo se conservan para los experimentos anteriores.
 
+La exploracion posterior del entrenamiento del hibrido se documenta en [RESULTADOS_EXPLORACION_HIBRIDO.md](RESULTADOS_EXPLORACION_HIBRIDO.md). Para verla en porcentajes sin reentrenar: `python show_results.py --hybrid-search latest --details`. La desviacion entre semillas es opcional con `--show-variability`.
+
 ## Implementacion
 
 Implementacion experimental para comparar cuatro enfoques de deteccion de fraude:

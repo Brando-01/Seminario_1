@@ -6,16 +6,16 @@ Corrida: `outputs/validation_v2_20260906_212206/`. Cuatro modelos, dos datasets 
 
 **No se demuestra que el hibrido sea el mejor.** El baseline de gradient boosting obtuvo la mayor AP promedio en ambos experimentos. La comparacion corresponde a estas ventanas, variables y presupuesto; no establece una superioridad universal ni el potencial maximo de las arquitecturas.
 
-AP significa average precision; no es accuracy. Valores mayores son mejores. Media +/- desviacion estandar muestral de tres semillas, todas sobre el mismo test:
+AP significa average precision; no es accuracy ni porcentaje de transacciones acertadas. Valores mayores son mejores. La tabla presenta el **promedio de tres semillas en porcentaje**, como suelen hacerlo los articulos. Para consultar la variacion entre semillas usa `python show_results.py --validation-run latest --show-variability`.
 
-| Modelo | AP IEEE-CIS | AP PaySim | F1 IEEE-CIS | F1 PaySim |
+| Modelo | AP IEEE-CIS (%) | AP PaySim (%) | F1 IEEE-CIS (%) | F1 PaySim (%) |
 |---|---:|---:|---:|---:|
-| Baseline | 0.6008 +/- 0.0002 | 0.0785 +/- 0.0243 | 0.5862 | 0.0868 |
-| Autoencoder | 0.2970 +/- 0.0086 | 0.0097 +/- 0.0077 | 0.3326 | 0.0328 |
-| GNN | 0.4649 +/- 0.0013 | 0.0018 +/- 0.0009 | 0.4237 | 0.0033 |
-| Hibrido | 0.4702 +/- 0.0088 | 0.0032 +/- 0.0022 | 0.4205 | 0.0025 |
+| Baseline | 60.08 | 7.85 | 58.62 | 8.68 |
+| Autoencoder | 29.70 | 0.97 | 33.26 | 3.28 |
+| GNN | 46.49 | 0.18 | 42.37 | 0.33 |
+| Hibrido | 47.02 | 0.32 | 42.05 | 0.25 |
 
-En IEEE, el hibrido gana 0.0053 de AP promedio a la GNN, pero pierde 0.1306 frente al baseline; su F1 promedio tambien es ligeramente inferior al de la GNN. No gana a la GNN en todas las semillas. En PaySim supera a la GNN en AP promedio, pero queda por debajo del AE y del baseline. Esto no respalda afirmar que fusionar los componentes mejora necesariamente el sistema.
+En IEEE, el hibrido gana **0.53 puntos porcentuales** de AP promedio a la GNN, pero pierde **13.06 puntos** frente al baseline; su F1 promedio tambien es ligeramente inferior al de la GNN. No gana a la GNN en todas las semillas. En PaySim supera a la GNN en AP promedio, pero queda por debajo del AE y del baseline. Esto no respalda afirmar que fusionar los componentes mejora necesariamente el sistema.
 
 ## Cobertura real
 

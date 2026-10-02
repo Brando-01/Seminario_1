@@ -10,9 +10,11 @@ python validate_experiments.py --epochs 30 --seeds 42 52 62
 Cada ejecucion crea `outputs/validation_v2_FECHA_HORA/`, sin sobrescribir corridas anteriores. Para ver el ultimo informe terminado en PowerShell:
 
 ```powershell
-python show_results.py --validation-run latest --details
+python show_results.py --validation-run latest
 python audit_validation.py --run latest
 ```
+
+`show_results.py` presenta por defecto solo el promedio en porcentajes, como una tabla de articulo. La salida muestra AP (average precision), ROC-AUC, precision, recall y F1; tambien separa el punto operativo y sus falsas alarmas por 1000 legitimas. Para ver la desviacion estandar entre semillas agrega `--show-variability`. No reentrena ni modifica los resultados guardados. Las corridas anteriores pueden conservar un `REPORT.md` en escala 0-1; el visor las muestra con el nuevo formato a partir de `results.json`.
 
 Este comando avisa si la corrida mas reciente esta incompleta. Alternativamente, para leer el ultimo informe terminado:
 

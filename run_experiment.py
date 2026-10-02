@@ -216,11 +216,11 @@ def run_gnn(prepared: PreparedExperiment, epochs: int) -> dict:
     return result
 
 
-def run_hybrid(prepared: PreparedExperiment, epochs: int) -> dict:
+def train_hybrid_model(prepared: PreparedExperiment, epochs: int):
     import torch
 
     from src.models.hybrid import HybridGNNAutoencoder
-    from src.training.torch_trainer import fit_hybrid
+    from src.training.torch_trainer import fit_autoencoder, fit_hybrid
 
     device = torch_device()
     _, features, labels, edges = torch_data(prepared, device)
@@ -229,7 +229,25 @@ def run_hybrid(prepared: PreparedExperiment, epochs: int) -> dict:
     set_global_seed(int(training_cfg["seed"]))
     model = HybridGNNAutoencoder(features["train"].shape[1], model_cfg["hidden_dimension"], model_cfg["latent_dimension"], model_cfg["gnn_layers"], model_cfg["dropout"]).to(device)
     validation_start = len(features["validation"]) - len(labels["validation"])
+    pretrain_epochs = int(training_cfg.get("ae_pretrain_epochs", 0))
+    pretraining = None
+    if pretrain_epochs:
+        pretraining = fit_autoencoder(
+            model.autoencoder, features["train"], labels["train"], pretrain_epochs,
+            training_cfg["learning_rate"], features["validation"][validation_start:],
+            labels["validation"], training_cfg["batch_size"], training_cfg["early_stopping_patience"],
+        )
     training = fit_hybrid(model, features["train"], edges["train"], labels["train"], features["validation"], edges["validation"], labels["validation"], validation_start, epochs, training_cfg["learning_rate"], training_cfg["weight_decay"], training_cfg["reconstruction_weight"], training_cfg["early_stopping_patience"], training_cfg.get("positive_weight_cap"))
+    return model, training, pretraining
+
+
+def run_hybrid(prepared: PreparedExperiment, epochs: int) -> dict:
+    import torch
+
+    model, training, pretraining = train_hybrid_model(prepared, epochs)
+    device = torch_device()
+    _, features, labels, edges = torch_data(prepared, device)
+    validation_start = len(features["validation"]) - len(labels["validation"])
     model.eval()
     with torch.no_grad():
         validation_scores = torch.sigmoid(model(features["validation"], edges["validation"])["logits"][validation_start:]).cpu().numpy()
@@ -237,8 +255,10 @@ def run_hybrid(prepared: PreparedExperiment, epochs: int) -> dict:
         test_scores = torch.sigmoid(model(features["test"], edges["test"])["logits"][test_start:]).cpu().numpy()
     metrics, operating_metrics = evaluate_scores(prepared, validation_scores, test_scores, "hybrid")
     save_json(output_dir(prepared.config, "metrics") / "hybrid_history.json", training.history)
+    if pretraining is not None:
+        save_json(output_dir(prepared.config, "metrics") / "hybrid_ae_pretraining_history.json", pretraining.history)
     torch.save(model.state_dict(), output_dir(prepared.config, "checkpoints") / "hybrid.pt")
-    result = {"model": "hybrid_gnn_autoencoder", "training": {"best_epoch": training.best_epoch, "best_loss": training.best_validation_loss}, "metrics": metrics, "operating_metrics": operating_metrics}
+    result = {"model": "hybrid_gnn_autoencoder", "training": {"best_epoch": training.best_epoch, "best_loss": training.best_validation_loss, "ae_pretrain_best_epoch": pretraining.best_epoch if pretraining is not None else None}, "metrics": metrics, "operating_metrics": operating_metrics}
     save_json(output_dir(prepared.config, "metrics") / "hybrid_metrics.json", result)
     return result
 
