@@ -1,0 +1,551 @@
+{
+  "scope": "Descriptive characterization only; no model/threshold selection from test.",
+  "shape": {
+    "rows": 1030563,
+    "columns": 29
+  },
+  "splits": {
+    "train": {
+      "rows": 348191,
+      "fraud": 197,
+      "fraud_rate": 0.0005657814245629554,
+      "time_min": 3600,
+      "time_max": 57600
+    },
+    "validation": {
+      "rows": 226064,
+      "fraud": 74,
+      "fraud_rate": 0.0003273409300021233,
+      "time_min": 61200,
+      "time_max": 86400
+    },
+    "test": {
+      "rows": 456308,
+      "fraud": 619,
+      "fraud_rate": 0.001356539880957599,
+      "time_min": 90000,
+      "time_max": 259200
+    }
+  },
+  "train_missing_fraction": {
+    "step": 0.0,
+    "type": 0.0,
+    "amount": 0.0,
+    "nameOrig": 0.0,
+    "oldbalanceOrg": 0.0,
+    "newbalanceOrig": 0.0,
+    "nameDest": 0.0,
+    "oldbalanceDest": 0.0,
+    "newbalanceDest": 0.0,
+    "isFraud": 0.0,
+    "isFlaggedFraud": 0.0,
+    "amount_log1p": 0.0,
+    "destination_is_merchant": 0.0,
+    "origin_previous_count_log1p": 0.0,
+    "origin_previous_amount_sum_log1p": 0.0,
+    "origin_previous_amount_mean_log1p": 0.0,
+    "origin_time_since_previous": 0.0,
+    "origin_is_new": 0.0,
+    "origin_amount_vs_previous_mean": 0.0,
+    "destination_previous_count_log1p": 0.0,
+    "destination_previous_amount_sum_log1p": 0.0,
+    "destination_previous_amount_mean_log1p": 0.0,
+    "destination_time_since_previous": 0.0,
+    "destination_is_new": 0.0,
+    "destination_amount_vs_previous_mean": 0.0,
+    "_time_seconds": 0.0,
+    "hour_sin": 0.0,
+    "hour_cos": 0.0,
+    "elapsed_days": 0.0
+  },
+  "train_amount_distribution": {
+    "count": 348191.0,
+    "mean": 174437.09862658713,
+    "std": 292481.66380345315,
+    "min": 0.3,
+    "25%": 13101.560000000001,
+    "50%": 80219.06,
+    "75%": 231703.055,
+    "95%": 576574.845,
+    "99%": 1523685.8399999999,
+    "max": 10000000.0
+  },
+  "column_types": {
+    "step": "int64",
+    "type": "str",
+    "amount": "float64",
+    "nameOrig": "str",
+    "oldbalanceOrg": "float64",
+    "newbalanceOrig": "float64",
+    "nameDest": "str",
+    "oldbalanceDest": "float64",
+    "newbalanceDest": "float64",
+    "isFraud": "int64",
+    "isFlaggedFraud": "int64",
+    "amount_log1p": "float64",
+    "destination_is_merchant": "int8",
+    "origin_previous_count_log1p": "float32",
+    "origin_previous_amount_sum_log1p": "float32",
+    "origin_previous_amount_mean_log1p": "float32",
+    "origin_time_since_previous": "float32",
+    "origin_is_new": "int8",
+    "origin_amount_vs_previous_mean": "float32",
+    "destination_previous_count_log1p": "float32",
+    "destination_previous_amount_sum_log1p": "float32",
+    "destination_previous_amount_mean_log1p": "float32",
+    "destination_time_since_previous": "float32",
+    "destination_is_new": "int8",
+    "destination_amount_vs_previous_mean": "float32",
+    "_time_seconds": "int64",
+    "hour_sin": "float64",
+    "hour_cos": "float64",
+    "elapsed_days": "float64"
+  },
+  "fraud_by_period": [
+    {
+      "period": 1,
+      "rows": 2708,
+      "frauds": 16,
+      "fraud_rate": 0.005908419497784343
+    },
+    {
+      "period": 2,
+      "rows": 1014,
+      "frauds": 8,
+      "fraud_rate": 0.007889546351084813
+    },
+    {
+      "period": 3,
+      "rows": 552,
+      "frauds": 4,
+      "fraud_rate": 0.007246376811594203
+    },
+    {
+      "period": 4,
+      "rows": 565,
+      "frauds": 10,
+      "fraud_rate": 0.017699115044247787
+    },
+    {
+      "period": 5,
+      "rows": 665,
+      "frauds": 6,
+      "fraud_rate": 0.009022556390977444
+    },
+    {
+      "period": 6,
+      "rows": 1660,
+      "frauds": 22,
+      "fraud_rate": 0.01325301204819277
+    },
+    {
+      "period": 7,
+      "rows": 6837,
+      "frauds": 12,
+      "fraud_rate": 0.0017551557700745941
+    },
+    {
+      "period": 8,
+      "rows": 21097,
+      "frauds": 12,
+      "fraud_rate": 0.000568801251362753
+    },
+    {
+      "period": 9,
+      "rows": 37628,
+      "frauds": 19,
+      "fraud_rate": 0.0005049431274582757
+    },
+    {
+      "period": 10,
+      "rows": 35991,
+      "frauds": 11,
+      "fraud_rate": 0.0003056319635464422
+    },
+    {
+      "period": 11,
+      "rows": 37241,
+      "frauds": 7,
+      "fraud_rate": 0.0001879648774200478
+    },
+    {
+      "period": 12,
+      "rows": 36153,
+      "frauds": 14,
+      "fraud_rate": 0.00038724310568970764
+    },
+    {
+      "period": 13,
+      "rows": 37515,
+      "frauds": 14,
+      "fraud_rate": 0.00037318405970944955
+    },
+    {
+      "period": 14,
+      "rows": 41485,
+      "frauds": 12,
+      "fraud_rate": 0.0002892611787393034
+    },
+    {
+      "period": 15,
+      "rows": 44609,
+      "frauds": 20,
+      "fraud_rate": 0.000448340021071981
+    },
+    {
+      "period": 16,
+      "rows": 42471,
+      "frauds": 10,
+      "fraud_rate": 0.00023545478090932637
+    },
+    {
+      "period": 17,
+      "rows": 43361,
+      "frauds": 7,
+      "fraud_rate": 0.0001614353912502018
+    },
+    {
+      "period": 18,
+      "rows": 49579,
+      "frauds": 16,
+      "fraud_rate": 0.0003227172794933339
+    },
+    {
+      "period": 19,
+      "rows": 51352,
+      "frauds": 11,
+      "fraud_rate": 0.00021420782053279327
+    },
+    {
+      "period": 20,
+      "rows": 40625,
+      "frauds": 4,
+      "fraud_rate": 9.846153846153846e-05
+    },
+    {
+      "period": 21,
+      "rows": 19152,
+      "frauds": 5,
+      "fraud_rate": 0.0002610693400167084
+    },
+    {
+      "period": 22,
+      "rows": 12635,
+      "frauds": 23,
+      "fraud_rate": 0.0018203403244954491
+    },
+    {
+      "period": 23,
+      "rows": 6144,
+      "frauds": 2,
+      "fraud_rate": 0.0003255208333333333
+    },
+    {
+      "period": 24,
+      "rows": 3216,
+      "frauds": 6,
+      "fraud_rate": 0.0018656716417910447
+    },
+    {
+      "period": 25,
+      "rows": 1598,
+      "frauds": 18,
+      "fraud_rate": 0.011264080100125156
+    },
+    {
+      "period": 26,
+      "rows": 440,
+      "frauds": 12,
+      "fraud_rate": 0.02727272727272727
+    },
+    {
+      "period": 27,
+      "rows": 41,
+      "frauds": 8,
+      "fraud_rate": 0.1951219512195122
+    },
+    {
+      "period": 28,
+      "rows": 4,
+      "frauds": 4,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 29,
+      "rows": 4,
+      "frauds": 4,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 30,
+      "rows": 8,
+      "frauds": 8,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 31,
+      "rows": 12,
+      "frauds": 12,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 32,
+      "rows": 12,
+      "frauds": 12,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 33,
+      "rows": 23616,
+      "frauds": 12,
+      "fraud_rate": 0.0005081300813008131
+    },
+    {
+      "period": 34,
+      "rows": 30904,
+      "frauds": 22,
+      "fraud_rate": 0.0007118819570282164
+    },
+    {
+      "period": 35,
+      "rows": 29157,
+      "frauds": 15,
+      "fraud_rate": 0.000514456219775697
+    },
+    {
+      "period": 36,
+      "rows": 39774,
+      "frauds": 19,
+      "fraud_rate": 0.00047769899934630664
+    },
+    {
+      "period": 37,
+      "rows": 34000,
+      "frauds": 13,
+      "fraud_rate": 0.0003823529411764706
+    },
+    {
+      "period": 38,
+      "rows": 31453,
+      "frauds": 16,
+      "fraud_rate": 0.0005086955139414365
+    },
+    {
+      "period": 39,
+      "rows": 23391,
+      "frauds": 12,
+      "fraud_rate": 0.0005130178273695011
+    },
+    {
+      "period": 40,
+      "rows": 34270,
+      "frauds": 14,
+      "fraud_rate": 0.0004085205719288007
+    },
+    {
+      "period": 41,
+      "rows": 36348,
+      "frauds": 12,
+      "fraud_rate": 0.0003301419610432486
+    },
+    {
+      "period": 42,
+      "rows": 41304,
+      "frauds": 14,
+      "fraud_rate": 0.0003389502227387178
+    },
+    {
+      "period": 43,
+      "rows": 45060,
+      "frauds": 13,
+      "fraud_rate": 0.00028850421660008875
+    },
+    {
+      "period": 44,
+      "rows": 38523,
+      "frauds": 8,
+      "fraud_rate": 0.00020766814630220908
+    },
+    {
+      "period": 45,
+      "rows": 18500,
+      "frauds": 16,
+      "fraud_rate": 0.0008648648648648649
+    },
+    {
+      "period": 46,
+      "rows": 12445,
+      "frauds": 14,
+      "fraud_rate": 0.001124949779027722
+    },
+    {
+      "period": 47,
+      "rows": 8681,
+      "frauds": 21,
+      "fraud_rate": 0.0024190761433014627
+    },
+    {
+      "period": 48,
+      "rows": 5693,
+      "frauds": 10,
+      "fraud_rate": 0.001756543123133673
+    },
+    {
+      "period": 49,
+      "rows": 764,
+      "frauds": 4,
+      "fraud_rate": 0.005235602094240838
+    },
+    {
+      "period": 50,
+      "rows": 6,
+      "frauds": 6,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 51,
+      "rows": 14,
+      "frauds": 14,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 52,
+      "rows": 8,
+      "frauds": 8,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 53,
+      "rows": 10,
+      "frauds": 10,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 54,
+      "rows": 4,
+      "frauds": 4,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 55,
+      "rows": 12,
+      "frauds": 12,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 56,
+      "rows": 18,
+      "frauds": 18,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 57,
+      "rows": 6,
+      "frauds": 6,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 58,
+      "rows": 20,
+      "frauds": 20,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 59,
+      "rows": 20,
+      "frauds": 20,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 60,
+      "rows": 12,
+      "frauds": 12,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 61,
+      "rows": 14,
+      "frauds": 14,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 62,
+      "rows": 8,
+      "frauds": 8,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 63,
+      "rows": 8,
+      "frauds": 8,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 64,
+      "rows": 18,
+      "frauds": 18,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 65,
+      "rows": 20,
+      "frauds": 20,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 66,
+      "rows": 24,
+      "frauds": 24,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 67,
+      "rows": 6,
+      "frauds": 6,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 68,
+      "rows": 18,
+      "frauds": 18,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 69,
+      "rows": 20,
+      "frauds": 20,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 70,
+      "rows": 6,
+      "frauds": 6,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 71,
+      "rows": 20,
+      "frauds": 20,
+      "fraud_rate": 1.0
+    },
+    {
+      "period": 72,
+      "rows": 14,
+      "frauds": 14,
+      "fraud_rate": 1.0
+    }
+  ],
+  "source": {
+    "path": "C:\\Users\\ADMIN\\Documents\\Seminario_Investigacion\\fraud_detection_gnn_ae\\data\\raw\\paysim\\PS_20174392719_1491204439457_log.csv",
+    "excluded_from_features": [
+      "isFlaggedFraud",
+      "newbalanceDest",
+      "newbalanceOrig",
+      "oldbalanceDest",
+      "oldbalanceOrg"
+    ],
+    "sample_mode": "window",
+    "causal_history_features": true,
+    "balance_consistency_features": false
+  }
+}

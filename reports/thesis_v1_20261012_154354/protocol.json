@@ -1,0 +1,84 @@
+{
+  "schema": "thesis_v1",
+  "datasets": [
+    "ieee",
+    "paysim"
+  ],
+  "models": [
+    "baseline",
+    "autoencoder",
+    "gnn",
+    "hybrid"
+  ],
+  "seeds": [
+    42,
+    52,
+    62
+  ],
+  "epochs": 30,
+  "created_at": "2026-10-12T15:43:55.056490-05:00",
+  "feature_set": "enriched_common_strict_paysim",
+  "primary_metric": "average_precision",
+  "train_complete": true,
+  "test_evaluated": true,
+  "shap_complete": true,
+  "python": "3.12.14",
+  "torch": "2.13.0+cpu",
+  "device": "cpu",
+  "selection": "Fixed architecture; supervised checkpoint by validation AP; AE checkpoint by validation normal MSE; thresholds frozen on validation.",
+  "holdout": {
+    "ieee": "TransactionDT days [60,75)",
+    "paysim": "step 25..72"
+  },
+  "caveat": "Frozen prospective local protocol on later time windows; prior access to these records outside the recorded pilots cannot be certified. A single period and three seeds do not establish statistical superiority.",
+  "timing_scope": "Training optimization (AE pretraining included for hybrid), validation separately; test score inference including graph-context preparation; excludes CSV loading, general preprocessing, checkpoint I/O and SHAP.",
+  "shap_scope": "Approximate grouped SHAP of transformed target features through the actual hybrid; past features and graph fixed; not graph-edge or causal attribution.",
+  "config_sha256": {
+    "ieee": "8188df409e0331347f515bed51456ee5a48dd39e95aa70004c05795675e83a6b",
+    "paysim": "d9b4a5db1de5f76ea6dfa12005efffe78c334c0940bd68be9128f4a08b72b60e"
+  },
+  "source_sha256": {
+    "run_experiment.py": "a61a1ae2040a6fb71d485cc71d2acd6f32f5c0db94ead385d96dcc23a0f3ddc1",
+    "thesis_experiment.py": "8ad68205e424267d920e3cdc8d4de3b7a0b350858cc61aa7b5eec1263f5abee0",
+    "src\\__init__.py": "22e0433e87dedf2f96cf09b22cd530c15e5579ac12d00f99467d70929bfd177e",
+    "src\\data\\__init__.py": "42f945e30733a2eb8315263649ecaeb472ee8903bc098040223d0208a30843f4",
+    "src\\data\\dataset.py": "3d2cabce6ea0b587d4ad71916107609d8c38023a14e6edf738ea3cf3b27f966c",
+    "src\\data\\loaders.py": "f103be8d0bd846c44cc9aec4781054e79e055cb58b226b8e7a8721a240946e62",
+    "src\\data\\preprocessing.py": "28bc1d3cc0e6da16b789b9e0cf38858e76ee4ca9cdbb9dc5fe015e53030cb7f2",
+    "src\\data\\temporal_split.py": "86a72c476679da6f0472582893be181d5ef9e494934bdb76ad3171e729fb8d15",
+    "src\\evaluation\\__init__.py": "66dcc8cd7744fb51678cba1bb26314578e669e488b3ee57a94011744d4be6ec8",
+    "src\\evaluation\\metrics.py": "38c603eb9cf2431be162a183c6bb940b3317affdcf4d0014e3e9b76e565b09fe",
+    "src\\explainability\\__init__.py": "70ba0f1160d1b9484750631ef56a50f20153e6be0b5cd6a9dae8e1052f0af2a5",
+    "src\\explainability\\conditional_shap.py": "b943446b1bf3451c65a2d03caf52aea63c36fe69cd211cd7307504c23443608b",
+    "src\\explainability\\report.py": "5aeaa67f2fd964086e7e4e8f1d646ce04be552991d7792d90425bfaa3e56c325",
+    "src\\graph\\__init__.py": "d3bcbfacbaa96f7398b6d496f6158ac41193e6146e628c12cbbcaa7a90afb31c",
+    "src\\graph\\subgraphs.py": "5af1e075929452ac342c12d36ace1028b62de7817ec2e265d09f2c46b940606c",
+    "src\\graph\\temporal_graph.py": "69f9ef530a66fb1b74266ea6ac0035561f69f9c17cec1cb017dad1706a4ecb18",
+    "src\\models\\__init__.py": "173147876618d317093366a1eff951c242939bff42825f0ab43743b2521e52c4",
+    "src\\models\\autoencoder.py": "b4beb669eeafa1ef9bf9afeca268161f5b6eda7e73ed217a810dc8c117e91eb0",
+    "src\\models\\baseline.py": "721f11df82657f5c4f5333ad4807711a39456f0500db5b5115236ae4f0c94121",
+    "src\\models\\gnn_classifier.py": "0877f6e7d37765e58e174e3f012a64adad3201879e0a17f5419d9d78507db48e",
+    "src\\models\\graphsage.py": "a0f25329bed63b423400a5c95fa79def45ff88c1e5a8e9dee11621c15de2a966",
+    "src\\models\\hybrid.py": "0c8dc10ad52e168b0c3206aa5ba15fa9ff14e444550cea33db0d98fa8a99810e",
+    "src\\training\\__init__.py": "c3c20ad4f5d78671d55c9a02308b562ee73b3ab05c82bce7a3d332afe6e75511",
+    "src\\training\\gnn_batches.py": "2c9d760ca516e064c4ddfa327bfbad5938c36aa61354750953033a0afa144c45",
+    "src\\training\\graph_batches.py": "1e2303b8a652e0a987ed1b8d32744939e7375851871333f83d42b643626ccc1f",
+    "src\\training\\losses.py": "13a9176eb51643360d19c13a8c40f01a00e3eef28bdc0f3be7740147ee2f5ec9",
+    "src\\training\\torch_trainer.py": "b666c1374bd3eb50f48d31df324971d2b19147c4800ad0a674fd534b3b179400",
+    "src\\utils\\__init__.py": "5e3b9a9d94fb97f6a4ad3eb152462e1f117b333b077aea00717bc29f0cb621d3",
+    "src\\utils\\config.py": "46d70da0ab095b5519847ed67fd6574fea794a509d6bd86c09d0e631d215c9bc",
+    "src\\utils\\reproducibility.py": "9cd2757fc58acaf4be0069f12e176ab7d386b76effd587a32f4037a14fd02999"
+  },
+  "explanations": {
+    "random_sample": 16,
+    "background_train_rows": 8,
+    "permutations": 3,
+    "seed": 42
+  },
+  "data_sha256": {
+    "data/raw/ieee_cis/train_transaction.csv": "3a5c83ab6b3cc13dcabe5ffa9f522307fd5f7f7b6e6f6a60c32284ca6283d642",
+    "data/raw/ieee_cis/train_identity.csv": "b63c725d8377be90a995268d97f347c17d456b95db45807adcf9f59cd603c37c",
+    "data/raw/paysim/PS_20174392719_1491204439457_log.csv": "16910f90577b0d981bf8ff289714510bb89bc71bff7d3f220f024e287e4eea6b"
+  },
+  "frozen_training_sha256": "46cccbcaba238ac3178669187c098bbc755d9dd640e46983d02f6c4a2e3c7439"
+}

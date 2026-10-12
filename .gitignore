@@ -8,3 +8,6 @@ data/processed/
 outputs/
 *.pt
 *.pth
+.env
+.env.*
+~$*.docx

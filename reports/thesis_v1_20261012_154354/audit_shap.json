@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "datasets": [
+    {
+      "dataset": "ieee",
+      "explained_cases": 20,
+      "groups": 424,
+      "global_random_sample": 16,
+      "max_additivity_error": 1.1920928955078125e-07
+    },
+    {
+      "dataset": "paysim",
+      "explained_cases": 20,
+      "groups": 18,
+      "global_random_sample": 16,
+      "max_additivity_error": 2.9802322387695312e-08
+    }
+  ],
+  "scope": "Numeric integrity of conditional grouped SHAP, not proof of causal validity or global population representativeness."
+}

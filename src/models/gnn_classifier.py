@@ -20,7 +20,7 @@ class GNNFraudClassifier(nn.Module):
             nn.Linear(hidden_dimension, 1),
         )
 
-    def forward(self, features: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
-        graph_embedding = self.encoder(features, edge_index)
+    def forward(self, features: torch.Tensor, edge_index: torch.Tensor, first_neighbor_mean: torch.Tensor | None = None) -> torch.Tensor:
+        graph_embedding = self.encoder(features, edge_index, first_neighbor_mean)
         tabular_embedding = self.tabular_projection(features)
         return self.classifier(torch.cat([graph_embedding, tabular_embedding], dim=1)).squeeze(1)

@@ -1,0 +1,866 @@
+[
+  {
+    "dataset": "ieee",
+    "seed": 42,
+    "model": "baseline",
+    "metrics": {
+      "auc_pr": 0.533193535425849,
+      "auc_roc": 0.8812681424248708,
+      "precision": 0.6869782971619366,
+      "recall": 0.4024449877750611,
+      "f1": 0.507554733271662,
+      "threshold": 0.7516293160787703,
+      "false_positives_per_1000": 8.333148152263284
+    },
+    "operating_metrics": {
+      "auc_pr": 0.533193535425849,
+      "auc_roc": 0.8812681424248708,
+      "precision": 0.6527131782945736,
+      "recall": 0.4117359413202934,
+      "f1": 0.5049475262368815,
+      "threshold": 0.7306058194106902,
+      "false_positives_per_1000": 9.95533432590387
+    },
+    "seconds": 26.58975849999115,
+    "inference_seconds": 1.046881700051017,
+    "validation_seconds": 0.5176128000020981,
+    "confusion_matrix": [
+      [
+        44626,
+        375
+      ],
+      [
+        1222,
+        823
+      ]
+    ]
+  },
+  {
+    "dataset": "ieee",
+    "seed": 42,
+    "model": "autoencoder",
+    "metrics": {
+      "auc_pr": 0.32992372356924665,
+      "auc_roc": 0.8160131622176937,
+      "precision": 0.37539267015706806,
+      "recall": 0.3506112469437653,
+      "f1": 0.36257901390644753,
+      "threshold": 0.2775329351425171,
+      "false_positives_per_1000": 26.510521988400257
+    },
+    "operating_metrics": {
+      "auc_pr": 0.32992372356924665,
+      "auc_roc": 0.8160131622176937,
+      "precision": 0.56,
+      "recall": 0.21222493887530564,
+      "f1": 0.3078014184397163,
+      "threshold": 0.3992205858230591,
+      "false_positives_per_1000": 7.577609386458079
+    },
+    "seconds": 36.489027399918996,
+    "inference_seconds": 0.39614849991630763,
+    "validation_seconds": 6.271657000295818,
+    "confusion_matrix": [
+      [
+        43808,
+        1193
+      ],
+      [
+        1328,
+        717
+      ]
+    ]
+  },
+  {
+    "dataset": "ieee",
+    "seed": 42,
+    "model": "gnn",
+    "metrics": {
+      "auc_pr": 0.4377315502796271,
+      "auc_roc": 0.767939185703507,
+      "precision": 0.6470588235294118,
+      "recall": 0.34963325183374083,
+      "f1": 0.45396825396825397,
+      "threshold": 0.859256386756897,
+      "false_positives_per_1000": 8.666474078353815
+    },
+    "operating_metrics": {
+      "auc_pr": 0.4377315502796271,
+      "auc_roc": 0.767939185703507,
+      "precision": 0.6008032128514056,
+      "recall": 0.36577017114914423,
+      "f1": 0.4547112462006079,
+      "threshold": 0.8206645846366882,
+      "false_positives_per_1000": 11.044199017799604
+    },
+    "seconds": 76.37148509989493,
+    "inference_seconds": 0.8383369999937713,
+    "validation_seconds": 7.876050700084306,
+    "confusion_matrix": [
+      [
+        44611,
+        390
+      ],
+      [
+        1330,
+        715
+      ]
+    ]
+  },
+  {
+    "dataset": "ieee",
+    "seed": 42,
+    "model": "hybrid",
+    "metrics": {
+      "auc_pr": 0.456548480865816,
+      "auc_roc": 0.829813491240537,
+      "precision": 0.5534458509142054,
+      "recall": 0.384841075794621,
+      "f1": 0.45399480819152005,
+      "threshold": 0.935349702835083,
+      "false_positives_per_1000": 14.110797537832493
+    },
+    "operating_metrics": {
+      "auc_pr": 0.456548480865816,
+      "auc_roc": 0.829813491240537,
+      "precision": 0.6168614357262103,
+      "recall": 0.3613691931540342,
+      "f1": 0.45575084798026516,
+      "threshold": 0.952582597732544,
+      "false_positives_per_1000": 10.199773338370258
+    },
+    "seconds": 155.99183820025064,
+    "inference_seconds": 1.4061139000114053,
+    "validation_seconds": 13.795568799832836,
+    "confusion_matrix": [
+      [
+        44366,
+        635
+      ],
+      [
+        1258,
+        787
+      ]
+    ]
+  },
+  {
+    "dataset": "ieee",
+    "seed": 52,
+    "model": "baseline",
+    "metrics": {
+      "auc_pr": 0.5440942661416953,
+      "auc_roc": 0.8807514845228379,
+      "precision": 0.6529992406985573,
+      "recall": 0.42053789731051344,
+      "f1": 0.5116002379535991,
+      "threshold": 0.7372179249851031,
+      "false_positives_per_1000": 10.155329881558187
+    },
+    "operating_metrics": {
+      "auc_pr": 0.5440942661416953,
+      "auc_roc": 0.8807514845228379,
+      "precision": 0.6529992406985573,
+      "recall": 0.42053789731051344,
+      "f1": 0.5116002379535991,
+      "threshold": 0.7372179249851031,
+      "false_positives_per_1000": 10.155329881558187
+    },
+    "seconds": 27.373686100007035,
+    "inference_seconds": 0.8984849998960271,
+    "validation_seconds": 0.5567739000543952,
+    "confusion_matrix": [
+      [
+        44544,
+        457
+      ],
+      [
+        1185,
+        860
+      ]
+    ]
+  },
+  {
+    "dataset": "ieee",
+    "seed": 52,
+    "model": "autoencoder",
+    "metrics": {
+      "auc_pr": 0.33606468245616333,
+      "auc_roc": 0.8182491570820295,
+      "precision": 0.3538244955419991,
+      "recall": 0.3687041564792176,
+      "f1": 0.3611111111111111,
+      "threshold": 0.27041861414909363,
+      "false_positives_per_1000": 30.599320015110777
+    },
+    "operating_metrics": {
+      "auc_pr": 0.33606468245616333,
+      "auc_roc": 0.8182491570820295,
+      "precision": 0.5666666666666667,
+      "recall": 0.21613691931540344,
+      "f1": 0.3129203539823009,
+      "threshold": 0.4034443497657776,
+      "false_positives_per_1000": 7.510944201239972
+    },
+    "seconds": 37.01437820016872,
+    "inference_seconds": 0.37536299997009337,
+    "validation_seconds": 6.123953399946913,
+    "confusion_matrix": [
+      [
+        43624,
+        1377
+      ],
+      [
+        1291,
+        754
+      ]
+    ]
+  },
+  {
+    "dataset": "ieee",
+    "seed": 52,
+    "model": "gnn",
+    "metrics": {
+      "auc_pr": 0.4411938636605254,
+      "auc_roc": 0.7433719946131054,
+      "precision": 0.6285475792988314,
+      "recall": 0.36821515892420537,
+      "f1": 0.46438482886216464,
+      "threshold": 0.9374297857284546,
+      "false_positives_per_1000": 9.888669140685762
+    },
+    "operating_metrics": {
+      "auc_pr": 0.4411938636605254,
+      "auc_roc": 0.7433719946131054,
+      "precision": 0.6333615580016935,
+      "recall": 0.36577017114914423,
+      "f1": 0.46373217606943584,
+      "threshold": 0.9396008849143982,
+      "false_positives_per_1000": 9.622008399813339
+    },
+    "seconds": 92.67551479989197,
+    "inference_seconds": 0.7953696000622585,
+    "validation_seconds": 9.216203800169751,
+    "confusion_matrix": [
+      [
+        44556,
+        445
+      ],
+      [
+        1292,
+        753
+      ]
+    ]
+  },
+  {
+    "dataset": "ieee",
+    "seed": 52,
+    "model": "hybrid",
+    "metrics": {
+      "auc_pr": 0.43664041189021413,
+      "auc_roc": 0.7742030780190758,
+      "precision": 0.6223591549295775,
+      "recall": 0.34572127139364306,
+      "f1": 0.44451430367808864,
+      "threshold": 0.9341003894805908,
+      "false_positives_per_1000": 9.533121486189195
+    },
+    "operating_metrics": {
+      "auc_pr": 0.43664041189021413,
+      "auc_roc": 0.7742030780190758,
+      "precision": 0.6099230111206159,
+      "recall": 0.3486552567237164,
+      "f1": 0.44368388301182327,
+      "threshold": 0.9277425408363342,
+      "false_positives_per_1000": 10.133108153152152
+    },
+    "seconds": 187.73763299989514,
+    "inference_seconds": 1.399829400004819,
+    "validation_seconds": 16.446588200167753,
+    "confusion_matrix": [
+      [
+        44572,
+        429
+      ],
+      [
+        1338,
+        707
+      ]
+    ]
+  },
+  {
+    "dataset": "ieee",
+    "seed": 62,
+    "model": "baseline",
+    "metrics": {
+      "auc_pr": 0.5422532782386524,
+      "auc_roc": 0.8836211898360965,
+      "precision": 0.7140319715808171,
+      "recall": 0.39315403422982886,
+      "f1": 0.5070955534531694,
+      "threshold": 0.7808223561186243,
+      "false_positives_per_1000": 7.155396546743406
+    },
+    "operating_metrics": {
+      "auc_pr": 0.5422532782386524,
+      "auc_roc": 0.8836211898360965,
+      "precision": 0.6638461538461539,
+      "recall": 0.42200488997555013,
+      "f1": 0.5159940209267564,
+      "threshold": 0.7375461522266908,
+      "false_positives_per_1000": 9.71089531343748
+    },
+    "seconds": 26.627189100021496,
+    "inference_seconds": 0.8543068000581115,
+    "validation_seconds": 0.4899981999769807,
+    "confusion_matrix": [
+      [
+        44679,
+        322
+      ],
+      [
+        1241,
+        804
+      ]
+    ]
+  },
+  {
+    "dataset": "ieee",
+    "seed": 62,
+    "model": "autoencoder",
+    "metrics": {
+      "auc_pr": 0.3309614367404487,
+      "auc_roc": 0.8161231679230817,
+      "precision": 0.45517241379310347,
+      "recall": 0.2904645476772616,
+      "f1": 0.3546268656716418,
+      "threshold": 0.33167245984077454,
+      "false_positives_per_1000": 15.799648896691187
+    },
+    "operating_metrics": {
+      "auc_pr": 0.3309614367404487,
+      "auc_roc": 0.8161231679230817,
+      "precision": 0.5672955974842767,
+      "recall": 0.22053789731051346,
+      "f1": 0.3176056338028169,
+      "threshold": 0.40446969866752625,
+      "false_positives_per_1000": 7.644274571676185
+    },
+    "seconds": 37.30488710012287,
+    "inference_seconds": 0.37726420001126826,
+    "validation_seconds": 6.27615269983653,
+    "confusion_matrix": [
+      [
+        44290,
+        711
+      ],
+      [
+        1451,
+        594
+      ]
+    ]
+  },
+  {
+    "dataset": "ieee",
+    "seed": 62,
+    "model": "gnn",
+    "metrics": {
+      "auc_pr": 0.4549399470353538,
+      "auc_roc": 0.7890430470738249,
+      "precision": 0.6553571428571429,
+      "recall": 0.3589242053789731,
+      "f1": 0.46382306477093205,
+      "threshold": 0.9127954840660095,
+      "false_positives_per_1000": 8.577587164729671
+    },
+    "operating_metrics": {
+      "auc_pr": 0.4549399470353538,
+      "auc_roc": 0.7890430470738249,
+      "precision": 0.6338983050847458,
+      "recall": 0.36577017114914423,
+      "f1": 0.4638759689922481,
+      "threshold": 0.9000524878501892,
+      "false_positives_per_1000": 9.599786671407301
+    },
+    "seconds": 72.31554359942675,
+    "inference_seconds": 0.8063761000521481,
+    "validation_seconds": 7.458429800113663,
+    "confusion_matrix": [
+      [
+        44615,
+        386
+      ],
+      [
+        1311,
+        734
+      ]
+    ]
+  },
+  {
+    "dataset": "ieee",
+    "seed": 62,
+    "model": "hybrid",
+    "metrics": {
+      "auc_pr": 0.4396824167619806,
+      "auc_roc": 0.7632747742796696,
+      "precision": 0.6818622696411252,
+      "recall": 0.3437652811735941,
+      "f1": 0.45708712613784136,
+      "threshold": 0.9788969159126282,
+      "false_positives_per_1000": 7.288726917179618
+    },
+    "operating_metrics": {
+      "auc_pr": 0.4396824167619806,
+      "auc_roc": 0.7632747742796696,
+      "precision": 0.6060358890701468,
+      "recall": 0.36332518337408315,
+      "f1": 0.454295322531336,
+      "threshold": 0.9595270752906799,
+      "false_positives_per_1000": 10.733094820115108
+    },
+    "seconds": 275.2170026998501,
+    "inference_seconds": 1.4336284999735653,
+    "validation_seconds": 23.230519500211813,
+    "confusion_matrix": [
+      [
+        44673,
+        328
+      ],
+      [
+        1342,
+        703
+      ]
+    ]
+  },
+  {
+    "dataset": "paysim",
+    "seed": 42,
+    "model": "baseline",
+    "metrics": {
+      "auc_pr": 0.07663776425262935,
+      "auc_roc": 0.9490034017652638,
+      "precision": 1.0,
+      "recall": 0.027463651050080775,
+      "f1": 0.05345911949685535,
+      "threshold": 0.9721220372838638,
+      "false_positives_per_1000": 0.0
+    },
+    "operating_metrics": {
+      "auc_pr": 0.07663776425262935,
+      "auc_roc": 0.9490034017652638,
+      "precision": 0.04032258064516129,
+      "recall": 0.04038772213247173,
+      "f1": 0.04035512510088781,
+      "threshold": 0.970922487482469,
+      "false_positives_per_1000": 1.3057150819967127
+    },
+    "seconds": 0.86909079994075,
+    "inference_seconds": 0.274083900032565,
+    "validation_seconds": 0.1326201999327168,
+    "confusion_matrix": [
+      [
+        455689,
+        0
+      ],
+      [
+        602,
+        17
+      ]
+    ]
+  },
+  {
+    "dataset": "paysim",
+    "seed": 42,
+    "model": "autoencoder",
+    "metrics": {
+      "auc_pr": 0.002103985469624514,
+      "auc_roc": 0.6474685153488269,
+      "precision": 0.0023279875840662182,
+      "recall": 0.3780290791599354,
+      "f1": 0.004627478123300539,
+      "threshold": 0.06299635767936707,
+      "false_positives_per_1000": 220.0667560551165
+    },
+    "operating_metrics": {
+      "auc_pr": 0.002103985469624514,
+      "auc_roc": 0.6474685153488269,
+      "precision": 0.0021222839818089943,
+      "recall": 0.10177705977382875,
+      "f1": 0.004157866948257656,
+      "threshold": 0.0960414707660675,
+      "false_positives_per_1000": 65.00486077127164
+    },
+    "seconds": 25.24078829982318,
+    "inference_seconds": 0.17245710000861436,
+    "validation_seconds": 2.081627400126308,
+    "confusion_matrix": [
+      [
+        355407,
+        100282
+      ],
+      [
+        385,
+        234
+      ]
+    ]
+  },
+  {
+    "dataset": "paysim",
+    "seed": 42,
+    "model": "gnn",
+    "metrics": {
+      "auc_pr": 0.2515969506402838,
+      "auc_roc": 0.9436828250750091,
+      "precision": 0.6746987951807228,
+      "recall": 0.18093699515347333,
+      "f1": 0.28535031847133757,
+      "threshold": 0.5935142636299133,
+      "false_positives_per_1000": 0.11850187298793695
+    },
+    "operating_metrics": {
+      "auc_pr": 0.2515969506402838,
+      "auc_roc": 0.9436828250750091,
+      "precision": 0.039383561643835614,
+      "recall": 0.6316639741518578,
+      "f1": 0.07414430643784962,
+      "threshold": 0.05303945019841194,
+      "false_positives_per_1000": 20.928747457147306
+    },
+    "seconds": 140.20750879996922,
+    "inference_seconds": 2.5149787000846118,
+    "validation_seconds": 25.009463299880736,
+    "confusion_matrix": [
+      [
+        455635,
+        54
+      ],
+      [
+        507,
+        112
+      ]
+    ]
+  },
+  {
+    "dataset": "paysim",
+    "seed": 42,
+    "model": "hybrid",
+    "metrics": {
+      "auc_pr": 0.2729924602997422,
+      "auc_roc": 0.9381646743590972,
+      "precision": 0.6842105263157895,
+      "recall": 0.1890145395799677,
+      "f1": 0.29620253164556964,
+      "threshold": 0.3750096261501312,
+      "false_positives_per_1000": 0.11850187298793695
+    },
+    "operating_metrics": {
+      "auc_pr": 0.2729924602997422,
+      "auc_roc": 0.9381646743590972,
+      "precision": 0.011693806898320298,
+      "recall": 0.7366720516962844,
+      "f1": 0.023022163881456052,
+      "threshold": 0.053690988570451736,
+      "false_positives_per_1000": 84.57303116818707
+    },
+    "seconds": 230.23254219978116,
+    "inference_seconds": 3.582764200051315,
+    "validation_seconds": 39.20496150001418,
+    "confusion_matrix": [
+      [
+        455635,
+        54
+      ],
+      [
+        502,
+        117
+      ]
+    ]
+  },
+  {
+    "dataset": "paysim",
+    "seed": 52,
+    "model": "baseline",
+    "metrics": {
+      "auc_pr": 0.049147052199795815,
+      "auc_roc": 0.9450991185068043,
+      "precision": 0.049836601307189546,
+      "recall": 0.39418416801292405,
+      "f1": 0.0884859474161378,
+      "threshold": 0.9405407711110976,
+      "false_positives_per_1000": 10.208716909997827
+    },
+    "operating_metrics": {
+      "auc_pr": 0.049147052199795815,
+      "auc_roc": 0.9450991185068043,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "threshold": Infinity,
+      "false_positives_per_1000": 0.0
+    },
+    "seconds": 0.9675068000797182,
+    "inference_seconds": 0.2851807000115514,
+    "validation_seconds": 0.14729340001940727,
+    "confusion_matrix": [
+      [
+        451037,
+        4652
+      ],
+      [
+        375,
+        244
+      ]
+    ]
+  },
+  {
+    "dataset": "paysim",
+    "seed": 52,
+    "model": "autoencoder",
+    "metrics": {
+      "auc_pr": 0.0018429347558217898,
+      "auc_roc": 0.6227345357634884,
+      "precision": 0.002266385038775227,
+      "recall": 0.23747980613893377,
+      "f1": 0.004489920586438607,
+      "threshold": 0.09142933785915375,
+      "false_positives_per_1000": 142.01352238039541
+    },
+    "operating_metrics": {
+      "auc_pr": 0.0018429347558217898,
+      "auc_roc": 0.6227345357634884,
+      "precision": 0.002266385038775227,
+      "recall": 0.23747980613893377,
+      "f1": 0.004489920586438607,
+      "threshold": 0.09142933785915375,
+      "false_positives_per_1000": 142.01352238039541
+    },
+    "seconds": 26.44596869999077,
+    "inference_seconds": 0.1625826999079436,
+    "validation_seconds": 2.1823665000265464,
+    "confusion_matrix": [
+      [
+        390975,
+        64714
+      ],
+      [
+        472,
+        147
+      ]
+    ]
+  },
+  {
+    "dataset": "paysim",
+    "seed": 52,
+    "model": "gnn",
+    "metrics": {
+      "auc_pr": 0.2801680991741851,
+      "auc_roc": 0.9429764084169712,
+      "precision": 0.8558558558558559,
+      "recall": 0.15347334410339256,
+      "f1": 0.2602739726027397,
+      "threshold": 0.6145780682563782,
+      "false_positives_per_1000": 0.035111666070499835
+    },
+    "operating_metrics": {
+      "auc_pr": 0.2801680991741851,
+      "auc_roc": 0.9429764084169712,
+      "precision": 0.02440101578889257,
+      "recall": 0.7140549273021002,
+      "f1": 0.04718945176960444,
+      "threshold": 0.019977055490016937,
+      "false_positives_per_1000": 38.78083517486707
+    },
+    "seconds": 193.21039459959138,
+    "inference_seconds": 2.5131462999852374,
+    "validation_seconds": 34.049705200479366,
+    "confusion_matrix": [
+      [
+        455673,
+        16
+      ],
+      [
+        524,
+        95
+      ]
+    ]
+  },
+  {
+    "dataset": "paysim",
+    "seed": 52,
+    "model": "hybrid",
+    "metrics": {
+      "auc_pr": 0.27408893878296986,
+      "auc_roc": 0.9528645417058472,
+      "precision": 0.7254901960784313,
+      "recall": 0.17932148626817448,
+      "f1": 0.28756476683937826,
+      "threshold": 0.4309299886226654,
+      "false_positives_per_1000": 0.09216812343506207
+    },
+    "operating_metrics": {
+      "auc_pr": 0.27408893878296986,
+      "auc_roc": 0.9528645417058472,
+      "precision": 0.03807357594936709,
+      "recall": 0.6219709208400647,
+      "f1": 0.07175472928897586,
+      "threshold": 0.029398050159215927,
+      "false_positives_per_1000": 21.345698491734492
+    },
+    "seconds": 297.86689150042366,
+    "inference_seconds": 3.567845999961719,
+    "validation_seconds": 50.1423331995029,
+    "confusion_matrix": [
+      [
+        455647,
+        42
+      ],
+      [
+        508,
+        111
+      ]
+    ]
+  },
+  {
+    "dataset": "paysim",
+    "seed": 62,
+    "model": "baseline",
+    "metrics": {
+      "auc_pr": 0.047196580307249,
+      "auc_roc": 0.9413565921130258,
+      "precision": 1.0,
+      "recall": 0.014539579967689823,
+      "f1": 0.028662420382165606,
+      "threshold": 0.9479696999048822,
+      "false_positives_per_1000": 0.0
+    },
+    "operating_metrics": {
+      "auc_pr": 0.047196580307249,
+      "auc_roc": 0.9413565921130258,
+      "precision": 1.0,
+      "recall": 0.014539579967689823,
+      "f1": 0.028662420382165606,
+      "threshold": 0.9479696999048822,
+      "false_positives_per_1000": 0.0
+    },
+    "seconds": 0.756205299985595,
+    "inference_seconds": 0.20019509992562234,
+    "validation_seconds": 0.10312430001795292,
+    "confusion_matrix": [
+      [
+        455689,
+        0
+      ],
+      [
+        610,
+        9
+      ]
+    ]
+  },
+  {
+    "dataset": "paysim",
+    "seed": 62,
+    "model": "autoencoder",
+    "metrics": {
+      "auc_pr": 0.0022207925559635053,
+      "auc_roc": 0.6800245917089154,
+      "precision": 0.0014647772176045782,
+      "recall": 0.06946688206785137,
+      "f1": 0.0028690575479566305,
+      "threshold": 0.09033523499965668,
+      "false_positives_per_1000": 64.32676672028511
+    },
+    "operating_metrics": {
+      "auc_pr": 0.0022207925559635053,
+      "auc_roc": 0.6800245917089154,
+      "precision": 0.001905071672513533,
+      "recall": 0.13247172859450726,
+      "f1": 0.0037561266089505747,
+      "threshold": 0.07858207821846008,
+      "false_positives_per_1000": 94.27701787842146
+    },
+    "seconds": 31.98127879970707,
+    "inference_seconds": 0.1668245999608189,
+    "validation_seconds": 2.6060230002040043,
+    "confusion_matrix": [
+      [
+        426376,
+        29313
+      ],
+      [
+        576,
+        43
+      ]
+    ]
+  },
+  {
+    "dataset": "paysim",
+    "seed": 62,
+    "model": "gnn",
+    "metrics": {
+      "auc_pr": 0.2847070793398754,
+      "auc_roc": 0.9544598677645165,
+      "precision": 0.6355555555555555,
+      "recall": 0.2310177705977383,
+      "f1": 0.33886255924170616,
+      "threshold": 0.4898536205291748,
+      "false_positives_per_1000": 0.17994728861131165
+    },
+    "operating_metrics": {
+      "auc_pr": 0.2847070793398754,
+      "auc_roc": 0.9544598677645165,
+      "precision": 0.024793388429752067,
+      "recall": 0.7221324717285945,
+      "f1": 0.04794079794079794,
+      "threshold": 0.02595103345811367,
+      "false_positives_per_1000": 38.58333205322051
+    },
+    "seconds": 192.3400029001059,
+    "inference_seconds": 2.5070456999819726,
+    "validation_seconds": 33.74971709982492,
+    "confusion_matrix": [
+      [
+        455607,
+        82
+      ],
+      [
+        476,
+        143
+      ]
+    ]
+  },
+  {
+    "dataset": "paysim",
+    "seed": 62,
+    "model": "hybrid",
+    "metrics": {
+      "auc_pr": 0.33528105494429294,
+      "auc_roc": 0.955721985742969,
+      "precision": 0.6981981981981982,
+      "recall": 0.25040387722132473,
+      "f1": 0.3686087990487515,
+      "threshold": 0.63569176197052,
+      "false_positives_per_1000": 0.14703010167021807
+    },
+    "operating_metrics": {
+      "auc_pr": 0.33528105494429294,
+      "auc_roc": 0.955721985742969,
+      "precision": 0.02560114070905438,
+      "recall": 0.6381260096930533,
+      "f1": 0.04922731804586241,
+      "threshold": 0.10082410275936127,
+      "false_positives_per_1000": 32.99179923149341
+    },
+    "seconds": 296.24477310013026,
+    "inference_seconds": 3.727497600018978,
+    "validation_seconds": 49.723132200189866,
+    "confusion_matrix": [
+      [
+        455622,
+        67
+      ],
+      [
+        464,
+        155
+      ]
+    ]
+  }
+]

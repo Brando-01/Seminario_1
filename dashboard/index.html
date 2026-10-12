@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f3ee">
+  <title>Laboratorio de fraude · IEEE-CIS y PaySim</title>
+  <link rel="stylesheet" href="/studio.css">
+  <script src="/app.js" defer></script>
+  <script src="/model_viz.js" defer></script>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="#inicio" aria-label="Ir al inicio"><span class="brand-mark">FL</span><span><strong>FraudLab</strong><small>GNN · Autoencoder</small></span></a>
+      <div class="side-label">RECORRIDO</div>
+      <nav aria-label="Secciones del panel">
+        <a href="#datos"><span>01</span> Datos y partición</a>
+        <a href="#grafo"><span>02</span> Grafo temporal</a>
+        <a href="#modelo"><span>03</span> Los cuatro modelos</a>
+        <a href="#resultados"><span>04</span> Resultados</a>
+      </nav>
+      <div class="sidebar-bottom"><span class="live-dot"></span><span>Servidor local<br><strong>127.0.0.1</strong></span></div>
+    </aside>
+
+    <main id="inicio">
+      <header class="topbar"><span>Seminario de investigación / Panel experimental</span><span id="runStatus" class="top-status">Cargando corridas…</span></header>
+      <div class="content">
+        <section class="hero">
+          <div class="eyebrow"><span class="eyebrow-line"></span> EXPERIMENTO INTERACTIVO</div>
+          <h1>Del registro a la <em>evaluación.</em></h1>
+          <p>Explora las relaciones temporales, observa qué calcula cada modelo y compara sus resultados en corridas guardadas. Los datos y las animaciones se distinguen explícitamente.</p>
+          <div class="dataset-switch" role="group" aria-label="Seleccionar dataset">
+            <button type="button" class="dataset-button active" data-dataset="ieee">IEEE-CIS <span>Tarjetas · dispositivos</span></button>
+            <button type="button" class="dataset-button" data-dataset="paysim">PaySim <span>Cuentas · transferencias</span></button>
+          </div>
+        </section>
+
+        <section id="datos" class="section-block">
+          <div class="section-heading"><div><div class="section-kicker">01 / ENTRADA</div><h2>Los datos primero</h2></div><p>Dos escenarios distintos. El mismo protocolo de comparación.</p></div>
+          <div id="stats" class="stats-grid" aria-live="polite"></div>
+          <div class="info-strip"><span class="strip-icon">↳</span><span id="datasetExplanation">Selecciona un dataset para ver sus relaciones.</span></div>
+        </section>
+
+        <section id="grafo" class="section-block">
+          <div class="section-heading"><div><div class="section-kicker">02 / CONSTRUCCIÓN</div><h2>Un grafo que mira hacia atrás</h2></div><p>Cada círculo es una transacción; cada flecha, una relación con una operación anterior.</p></div>
+          <div class="stage-card">
+            <div class="stage-toolbar"><div class="stage-eyebrow"><span class="live-dot mint"></span> SUBGRAFO REAL · PRUEBA</div><div id="caseButtons" class="case-buttons" role="group" aria-label="Elegir ejemplo"></div></div>
+            <div class="graph-layout">
+              <div class="graph-frame"><svg id="graphSvg" viewBox="0 0 900 430" role="img" aria-label="Animación del grafo temporal"></svg><div class="graph-axis"><span>TRANSACCIONES ANTERIORES</span><span>TRANSACCIÓN EVALUADA →</span></div></div>
+              <div class="inspector"><div class="inspector-label">TRANSACCIÓN EN FOCO</div><h3 id="caseTitle">Preparando ejemplo…</h3><div id="caseFacts" class="case-facts"></div><div id="nodeDetail" class="node-detail">Haz clic sobre un nodo para conocer su papel.</div></div>
+            </div>
+            <div class="stage-footer"><div class="playback"><button id="playButton" type="button" aria-label="Reproducir animación">▶ Ver formación</button><button id="nextButton" type="button" aria-label="Avanzar un paso">Paso →</button><span id="stepLabel">0 / 0 transacciones</span></div><div class="progress-track"><div id="progressFill" class="progress-fill"></div></div></div>
+          </div>
+          <p id="graphNote" class="micro-note">Los identificadores están anonimizados. La posición es ilustrativa; las conexiones y puntajes proceden de datos reales.</p>
+        </section>
+
+        <section id="modelo" class="section-block">
+          <div class="section-heading"><div><div class="section-kicker">03 / MODELOS</div><h2>Cómo procesa cada modelo la transacción</h2></div><p>Selecciona un modelo para ver su recorrido. Las formas son esquemáticas; los puntajes son reales.</p></div>
+          <div class="model-workbench">
+            <div class="model-tabs" role="tablist" aria-label="Modelo a visualizar">
+              <button class="model-tab active" data-model="baseline" role="tab" aria-selected="true">01 <strong>Baseline</strong><span>Árboles tabulares</span></button>
+              <button class="model-tab" data-model="autoencoder" role="tab" aria-selected="false">02 <strong>Autoencoder</strong><span>Reconstrucción</span></button>
+              <button class="model-tab" data-model="gnn" role="tab" aria-selected="false">03 <strong>GraphSAGE</strong><span>Vecindario temporal</span></button>
+              <button class="model-tab" data-model="hybrid" role="tab" aria-selected="false">04 <strong>Híbrido GNN–AE</strong><span>Fusión aprendida</span></button>
+            </div>
+            <div class="model-stage">
+              <div class="model-stage-top"><div><span id="modelEyebrow" class="stage-tag">01 / BASELINE</span><h3 id="modelTitle">Decisiones sobre atributos tabulares</h3><p id="modelDescription">Un ensamble de árboles combina reglas aprendidas durante el entrenamiento.</p></div><button id="modelReplay" class="replay-button" type="button">↻ Reproducir</button></div>
+              <div id="modelScene" class="model-scene" aria-live="polite"></div>
+              <div class="model-stage-bottom"><span id="modelStep">Selecciona una transacción para comenzar.</span><span id="modelProvenance">Esquema del cálculo · puntaje de la corrida guardada</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="resultados" class="section-block results-section">
+          <div class="section-heading"><div><div class="section-kicker">04 / EVIDENCIA</div><h2>Resultados de cada corrida</h2></div><p>Porcentajes para leer rápido; semillas y límites disponibles debajo.</p></div>
+          <div class="results-panel"><div class="results-controls"><div><label for="runSelect">CORRIDA GUARDADA</label><select id="runSelect" aria-label="Elegir corrida"></select></div><span id="runBadge" class="run-badge">—</span></div>
+            <div id="runIntro" class="run-intro"></div>
+            <div id="candidateBox" class="candidate-box" hidden></div>
+            <div class="table-scroll"><table><thead><tr><th>Modelo</th><th>AP</th><th>Precision</th><th>Recall</th><th>F1</th><th>Recall operativo</th><th>FP / 1000 operativo</th></tr></thead><tbody id="metricsBody"></tbody></table></div>
+            <div class="run-intro">Medias por semilla. Precision, Recall y F1 usan el umbral F1 elegido en validación; Recall operativo y FP/1000 usan otro umbral, con presupuesto de 10 FP/1000 en validación. Ese presupuesto puede superarse en test. F1 es la media de los F1 individuales, no el F1 de las medias.</div>
+            <div id="comparisonFinding" class="comparison-finding"></div>
+            <div class="results-bottom"><div class="chart-card"><div class="chart-heading"><h3>Curva Precision–Recall</h3><span id="curveSeed">—</span></div><svg id="prChart" viewBox="0 0 600 300" role="img" aria-label="Curva Precision Recall"></svg><div id="curveLegend" class="curve-legend"></div></div><div class="reading-card"><div class="reading-kicker">CÓMO LEERLO</div><h3>AP es la métrica principal</h3><p>Resume la calidad del orden de alertas a distintos umbrales. No significa “porcentaje de operaciones acertadas”.</p><div id="resultCaveat" class="caveat"></div></div></div>
+            <details class="seed-details"><summary>Ver resultados por semilla y tiempo registrado <span>↗</span></summary><div id="seedRows" class="seed-rows"></div></details>
+            <details id="shapDetails" class="seed-details" hidden><summary>Explicabilidad SHAP del híbrido con contexto fijo <span>↗</span></summary><div id="shapContent" class="shap-content"></div></details>
+          </div>
+          <div class="end-note"><strong>Nota metodológica.</strong> Las dos bases se entrenan por separado. Las corridas históricas son exploratorias. La ruta thesis_v1 usa períodos posteriores y registra entrenamiento e inferencia por separado; no demuestra superioridad estadística. SHAP explica atributos de la transacción con vecinos y aristas fijos, no causalidad ni importancia de aristas.</div>
+        </section>
+        <footer>FraudLab · Visualización local de los experimentos IEEE-CIS y PaySim</footer>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

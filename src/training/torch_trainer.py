@@ -1,5 +1,6 @@
 from copy import deepcopy
 from dataclasses import dataclass
+import time
 
 import torch
 from sklearn.metrics import average_precision_score
@@ -13,6 +14,7 @@ class TrainingResult:
     best_epoch: int
     best_validation_loss: float
     history: list[dict[str, float]]
+    timing: dict[str, float] | None = None
 
 
 def _positive_weight(labels: torch.Tensor, maximum: float | None = None) -> float:
@@ -33,7 +35,11 @@ def fit_autoencoder(model, features: torch.Tensor, labels: torch.Tensor, epochs:
     best_loss, best_epoch, stale = float("inf"), 0, 0
     best_state = deepcopy(model.state_dict())
     history = []
+    train_seconds = validation_seconds = 0.0
     for epoch in range(epochs):
+        if features.is_cuda:
+            torch.cuda.synchronize()
+        tick = time.perf_counter()
         model.train()
         total = 0.0
         for indices in torch.randperm(len(normal), device=normal.device).split(batch_size):
@@ -44,9 +50,16 @@ def fit_autoencoder(model, features: torch.Tensor, labels: torch.Tensor, epochs:
             loss.backward()
             optimizer.step()
             total += float(loss.detach()) * len(batch)
+        if features.is_cuda:
+            torch.cuda.synchronize()
+        train_seconds += time.perf_counter() - tick
+        tick = time.perf_counter()
         model.eval()
         with torch.no_grad():
             val_loss = sum(float(functional.mse_loss(model(batch)[0], batch)) * len(batch) for batch in validation_normal.split(batch_size)) / len(validation_normal)
+        if features.is_cuda:
+            torch.cuda.synchronize()
+        validation_seconds += time.perf_counter() - tick
         history.append({"epoch": epoch + 1, "training_loss": total / len(normal), "validation_loss": val_loss})
         if val_loss < best_loss:
             best_loss, best_epoch, stale = val_loss, epoch + 1, 0
@@ -56,7 +69,7 @@ def fit_autoencoder(model, features: torch.Tensor, labels: torch.Tensor, epochs:
         if stale >= patience:
             break
     model.load_state_dict(best_state)
-    return TrainingResult(best_epoch, best_loss, history)
+    return TrainingResult(best_epoch, best_loss, history, {"train_seconds": train_seconds, "validation_seconds": validation_seconds})
 
 
 def fit_gnn(

@@ -29,10 +29,11 @@ class GraphSAGEEncoder(nn.Module):
         self.layers = nn.ModuleList(GraphSAGELayer(dimensions[i], dimensions[i + 1]) for i in range(layers))
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, features: torch.Tensor, edge_index: torch.Tensor) -> torch.Tensor:
+    def forward(self, features: torch.Tensor, edge_index: torch.Tensor, first_neighbor_mean: torch.Tensor | None = None) -> torch.Tensor:
         hidden = features
         for index, layer in enumerate(self.layers):
-            hidden = layer(hidden, edge_index)
+            hidden = (layer.linear(torch.cat([hidden, first_neighbor_mean], dim=1))
+                      if index == 0 and first_neighbor_mean is not None else layer(hidden, edge_index))
             if index < len(self.layers) - 1:
                 hidden = self.dropout(torch.relu(hidden))
         return hidden

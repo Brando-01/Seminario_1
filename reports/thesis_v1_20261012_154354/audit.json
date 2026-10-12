@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "rows": 24,
+  "same_partitions": true,
+  "frozen_hashes": true,
+  "metrics_reproduced": true,
+  "caveat": "Integrity check, not a proof of universal leakage absence or statistical superiority."
+}

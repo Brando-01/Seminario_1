@@ -1,0 +1,102 @@
+{
+  "experiment": {
+    "name": "thesis_v1_20261012_154354/paysim/prepared",
+    "dataset": "paysim",
+    "variant": "thesis_v1_frozen"
+  },
+  "source_metadata": {
+    "path": "C:\\Users\\ADMIN\\Documents\\Seminario_Investigacion\\fraud_detection_gnn_ae\\data\\raw\\paysim\\PS_20174392719_1491204439457_log.csv",
+    "excluded_from_features": [
+      "isFlaggedFraud",
+      "newbalanceDest",
+      "newbalanceOrig",
+      "oldbalanceDest",
+      "oldbalanceOrg"
+    ],
+    "sample_mode": "window",
+    "causal_history_features": true,
+    "balance_consistency_features": false
+  },
+  "raw_rows": 1030563,
+  "raw_columns": 29,
+  "model_feature_count": 23,
+  "retained_feature_columns": [
+    "amount",
+    "amount_log1p",
+    "destination_is_merchant",
+    "origin_previous_count_log1p",
+    "origin_previous_amount_sum_log1p",
+    "origin_previous_amount_mean_log1p",
+    "origin_time_since_previous",
+    "origin_is_new",
+    "origin_amount_vs_previous_mean",
+    "destination_previous_count_log1p",
+    "destination_previous_amount_sum_log1p",
+    "destination_previous_amount_mean_log1p",
+    "destination_time_since_previous",
+    "destination_is_new",
+    "destination_amount_vs_previous_mean",
+    "hour_sin",
+    "hour_cos",
+    "type",
+    "type__category_0",
+    "type__category_1",
+    "type__category_2",
+    "type__category_3",
+    "type__category_4"
+  ],
+  "splits": {
+    "train": {
+      "rows": 348191,
+      "fraud": 197,
+      "fraud_rate": 0.0005657814245629554,
+      "time_min": 3600,
+      "time_max": 57600
+    },
+    "validation": {
+      "rows": 226064,
+      "fraud": 74,
+      "fraud_rate": 0.0003273409300021233,
+      "time_min": 61200,
+      "time_max": 86400
+    },
+    "test": {
+      "rows": 456308,
+      "fraud": 619,
+      "fraud_rate": 0.001356539880957599,
+      "time_min": 90000,
+      "time_max": 259200
+    }
+  },
+  "feature_shapes": {
+    "train": [
+      348191,
+      23
+    ],
+    "validation": [
+      226064,
+      23
+    ],
+    "test": [
+      456308,
+      23
+    ]
+  },
+  "graphs": {
+    "train": {
+      "context_nodes": 348191,
+      "target_nodes": 348191,
+      "edges": 430369
+    },
+    "validation": {
+      "context_nodes": 574255,
+      "target_nodes": 226064,
+      "edges": 764227
+    },
+    "test": {
+      "context_nodes": 1030563,
+      "target_nodes": 456308,
+      "edges": 1457511
+    }
+  }
+}

@@ -157,10 +157,38 @@ def main() -> None:
     parser.add_argument("--show-variability", action="store_true", help="Muestra tambien la desviacion estandar entre semillas")
     parser.add_argument("--aggregate-seeds", action="store_true")
     parser.add_argument("--validation-run", help="Nombre de carpeta validation_v2_... o latest; no mezcla corridas antiguas")
+    parser.add_argument("--thesis-run", help="Corrida completa thesis_v1_... o latest: cuatro modelos, costos y SHAP")
     parser.add_argument("--hybrid-search", help="Nombre de carpeta hybrid_search_... o latest")
+    parser.add_argument("--minibatch-run", help="Nombre de carpeta minibatch_search_... o latest con resultados de test")
     args = parser.parse_args()
-    if args.validation_run and args.hybrid_search:
-        parser.error("Use --validation-run o --hybrid-search, no ambos")
+    if sum(bool(value) for value in (args.validation_run, args.hybrid_search, args.minibatch_run, args.thesis_run)) > 1:
+        parser.error("Elija solo una ruta de resultados: --validation-run, --hybrid-search o --minibatch-run")
+    if args.thesis_run:
+        from thesis_experiment import resolve_run, read_json
+        directory = resolve_run(args.thesis_run)
+        protocol = read_json(directory / "protocol.json")
+        print(f"Corrida: {directory}\n{protocol['caveat']}")
+        print(f"Entrenamiento completo: {protocol['train_complete']}; test: {protocol['test_evaluated']}; SHAP: {protocol['shap_complete']}")
+        if not (directory / "results.json").is_file():
+            print("Todavia no hay resultados de test. Revisar training_results.json; no interpretar validacion como test.")
+            return
+        rows = read_json(directory / "results.json")
+        if args.experiment != "all":
+            rows = [row for row in rows if row['dataset'] == args.experiment]
+        summaries = {dataset: read_json(directory / dataset / "prepared" / "metrics" / "prepare_summary.json")
+                     for dataset in {row['dataset'] for row in rows}}
+        print(render_validation_report(rows, summaries, show_variability=args.show_variability))
+        if args.details:
+            for row in rows:
+                print(f"{row['dataset']} seed={row['seed']} {row['model']}: AP={100 * row['metrics']['auc_pr']:.2f}% "
+                      f"F1={100 * row['metrics']['f1']:.2f}% train={row['seconds']:.2f}s infer={row['inference_seconds']:.2f}s "
+                      f"TN/FP,FN/TP={row['confusion_matrix']}")
+        for dataset in summaries:
+            explanation = directory / dataset / "explanations" / "summary.json"
+            if explanation.is_file():
+                saved = read_json(explanation)
+                print(f"SHAP {dataset}: {saved['global_scope']}\n{explanation.parent}")
+        return
     if args.hybrid_search:
         if args.hybrid_search == "latest":
             candidates = sorted((ROOT / "outputs").glob("hybrid_search_*"))
@@ -193,19 +221,29 @@ def main() -> None:
                         f"{row['operating_metrics']['false_positives_per_1000']:>10.2f}"
                     )
         return
-    if args.validation_run:
-        if args.validation_run == "latest":
-            candidates = sorted((ROOT / "outputs").glob("validation_v2_*"))
+    if args.validation_run or args.minibatch_run:
+        requested_run = args.validation_run or args.minibatch_run
+        prefix = "minibatch_search_" if args.minibatch_run else "validation_v2_"
+        if requested_run == "latest":
+            candidates = sorted((ROOT / "outputs").glob(prefix + "*"))
+            if args.minibatch_run:
+                candidates = [candidate for candidate in candidates if (candidate / "results.json").is_file()]
             if not candidates:
-                parser.error("No hay corridas validation_v2")
+                parser.error(f"No hay corridas {prefix} con resultados disponibles")
             directory = candidates[-1]
         else:
-            directory = ROOT / "outputs" / args.validation_run
+            directory = ROOT / "outputs" / requested_run
         report = directory / "REPORT.md"
         print(f"Corrida: {directory}")
         results_file = directory / "results.json"
         if report.is_file() and results_file.is_file():
             rows = json.loads(results_file.read_text(encoding="utf-8"))
+            if args.experiment != "all":
+                rows = [row for row in rows if row["dataset"] == args.experiment]
+            if args.minibatch_run:
+                protocol = json.loads((directory / "protocol.json").read_text(encoding="utf-8"))
+                print(protocol["caveat"])
+                print(f"Familia: {protocol.get('feature_set', 'original')}; datasets de test completos: {protocol.get('evaluated_datasets', [])}")
             summaries = {}
             for dataset in {row["dataset"] for row in rows}:
                 summary_file = directory / dataset / "prepared" / "metrics" / "prepare_summary.json"
@@ -223,6 +261,10 @@ def main() -> None:
                         f"{100 * op['recall']:>12.2f}%"
                         f"{op['false_positives_per_1000']:>10.2f}"
                     )
+                if args.minibatch_run:
+                    print("\nTiempo local (segundos): entrenamiento con preentrenamiento AE, e inferencia por lotes sobre test")
+                    for row in rows:
+                        print(f"{row['dataset']} {row['model']} semilla={row['seed']}: train={row['seconds']:.2f}s inference={row['inference_seconds']:.2f}s")
         elif report.is_file():
             print(report.read_text(encoding="utf-8"))
         else:

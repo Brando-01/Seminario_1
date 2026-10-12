@@ -1,62 +1,68 @@
-# Deteccion de fraude con GNN y Autoencoder
+# Detección de fraude con GNN y Autoencoder
 
-## Evaluacion actual: protocolo v2
+Un proyecto común con dos escenarios: IEEE-CIS (relaciones inferidas entre
+transacciones) y PaySim (relaciones por cuentas). En ambos se comparan baseline
+tabular, Autoencoder, GraphSAGE e híbrido GNN-AE. Los datos no se mezclan.
 
-Para comparar ambos datasets con ventanas temporales completas, tres semillas y resultados aislados:
+## Resultados actuales
 
-```powershell
-python -m pytest -q
-python validate_experiments.py --epochs 30 --seeds 42 52 62
-python show_results.py --validation-run latest --details
-```
+La única corrida activa de referencia es `thesis_v1_20261012_154354`.
+Se ejecutaron 24 modelos: cuatro enfoques × dos datasets × tres semillas.
+Las auditorías de resultados y SHAP pasaron; la suite aprobó 61 pruebas.
 
-Consultar [VALIDACION_V2.md](VALIDACION_V2.md) para el protocolo, limites y archivos de evidencia. Esta ruta excluye los saldos posteriores de PaySim, evita historial entre operaciones del mismo instante y selecciona las redes supervisadas por AP de validacion. No ejecuta la totalidad de los datasets ni demuestra superioridad estadistica. Los comandos de abajo se conservan para los experimentos anteriores.
+- [Reporte de métricas y costos](reports/thesis_v1_20261012_154354/REPORT.md).
+- [Estado, particiones y limitaciones](ESTADO_PROYECTO_VERIFICADO.md).
+- [Evidencia publicada y alcance del respaldo](reports/README.md).
+- [Guía Word de exposición](docs/Guia_exposicion_proyecto_completo.docx).
+- [Metodología y recorrido del código](PROYECTO_COMPLETO.md).
+- SHAP del híbrido: [IEEE-CIS](reports/thesis_v1_20261012_154354/ieee/explanations/REPORT_SHAP.md)
+  y [PaySim](reports/thesis_v1_20261012_154354/paysim/explanations/REPORT_SHAP.md).
 
-La exploracion posterior del entrenamiento del hibrido se documenta en [RESULTADOS_EXPLORACION_HIBRIDO.md](RESULTADOS_EXPLORACION_HIBRIDO.md). Para verla en porcentajes sin reentrenar: `python show_results.py --hybrid-search latest --details`. La desviacion entre semillas es opcional con `--show-variability`.
+| Dataset | Mejor AP media observada | AP del híbrido | F1 del híbrido |
+|---|---|---:|---:|
+| IEEE-CIS | Baseline: 53,98 % | 44,43 % | 45,19 % |
+| PaySim | Híbrido: 29,41 % | 29,41 % | 31,75 % |
 
-## Implementacion
+Son medias de las semillas 42, 52 y 62 sobre un solo período por dataset.
+No prueban superioridad estadística ni validez en producción. En PaySim el
+híbrido no mantuvo en test el presupuesto operativo de falsas alarmas fijado
+en validación. No se utilizó la totalidad de los CSV.
 
-Implementacion experimental para comparar cuatro enfoques de deteccion de fraude:
+Las corridas y reportes anteriores se retiraron del proyecto a un respaldo local
+fuera del repositorio. El código de experimentación anterior permanece disponible,
+pero no es la ruta recomendada para exponer o reproducir los resultados actuales.
 
-1. Baseline tabular supervisado.
-2. Autoencoder como detector de anomalias.
-3. GraphSAGE para aprender relaciones entre transacciones.
-4. Modelo hibrido GraphSAGE-Autoencoder.
+## Instalación en otra computadora
 
-Se ejecutan dos experimentos independientes. IEEE-CIS usa entidades inferidas (tarjeta, correo y dispositivo); PaySim usa las cuentas de origen y destino. Los datasets no se mezclan y las conclusiones se obtienen dentro de cada uno.
-
-Las configuraciones antiguas de PaySim incluyen una variante con cuatro saldos e historial y otra `strict` sin saldos. No deben confundirse con el protocolo v2 ni interpretarse como una ablacion controlada si cambian otras variables a la vez. Ninguna de esas configuraciones usa `isFlaggedFraud` ni errores de consistencia.
-
-## Estructura principal
-
-```text
-fraud_detection_gnn_ae/
-|-- configs/              # configuracion de cada experimento
-|-- data/raw/             # archivos originales, sin modificar
-|-- outputs/              # EDA, metricas y checkpoints
-|-- src/                  # carga, preprocesamiento, grafos, modelos y evaluacion
-|-- tests/                # pruebas automaticas
-|-- eda.py                # analisis exploratorio
-|-- run_experiment.py     # ejecutor de modelos
-|-- show_results.py       # visor e interprete de resultados
-`-- project.ps1           # comandos simplificados para PowerShell
-```
-
-## Instalacion
-
-Para instalar en otra computadora, necesitas Git, Python 3.12 de 64 bits (la serie utilizada en la validacion local), conexion para descargar las dependencias y los CSV originales. Los modelos pueden ejecutarse en CPU; una GPU no es obligatoria. El consumo de memoria y el tiempo dependen de la ventana de datos y del equipo.
-
-En PowerShell:
+Necesitas Git, Python 3.12 de 64 bits y conexión para instalar dependencias.
+La corrida publicada se ejecutó en CPU; una GPU no es obligatoria.
 
 ```powershell
 git clone https://github.com/Brando-01/Seminario_1.git
 cd Seminario_1
 py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pytest tests -q
+```
+
+`requirements-tested.txt` registra las versiones del equipo original (CPU);
+`requirements.txt` define los rangos de instalación. Los resultados numéricos
+pueden variar entre versiones y equipos. Las pruebas no requieren los datasets.
+
+Para leer las tablas, el Word y los gráficos publicados no necesitas entrenar.
+Para ejecutar el modelo, auditar los artefactos completos o usar el panel local,
+aporta los CSV y genera una corrida completa, o transfiere de manera separada
+la carpeta original `outputs/thesis_v1_20261012_154354` y su caché visual.
+
+## Datos necesarios para entrenar
+
+Crea las carpetas:
+
+```powershell
 New-Item -ItemType Directory -Force -Path data\raw\ieee_cis,data\raw\paysim | Out-Null
 ```
 
-Copia los archivos descomprimidos a estas rutas:
+Copia estos archivos descomprimidos:
 
 ```text
 data/raw/ieee_cis/train_transaction.csv
@@ -64,123 +70,72 @@ data/raw/ieee_cis/train_identity.csv
 data/raw/paysim/PS_20174392719_1491204439457_log.csv
 ```
 
-Estos tres archivos bastan para la evaluacion v2. Los archivos test y sample_submission de Kaggle no son necesarios para ese comando. Debes aportar los CSV por separado: los datos, `.venv`, `outputs` y los pesos de redes no estan incluidos en Git.
+El test oficial de Kaggle IEEE-CIS no se usa para calcular métricas porque no
+tiene etiquetas. El test del proyecto se toma de un período posterior del
+CSV de entrenamiento etiquetado.
 
-Sin activar el entorno ni cambiar la politica de PowerShell, puedes ejecutar:
+## Ejecutar el protocolo completo
 
-```powershell
-.\.venv\Scripts\python.exe -m pytest -q
-.\.venv\Scripts\python.exe validate_experiments.py --epochs 30 --seeds 42 52 62
-.\.venv\Scripts\python.exe show_results.py --validation-run latest --details
-.\.venv\Scripts\python.exe audit_validation.py --run latest
-```
-
-Las pruebas no requieren los datasets. El entrenamiento si los requiere. El visor y la auditoria requieren una corrida terminada en `outputs`; en un clon nuevo, primero hay que entrenar. El resumen historico se puede leer sin entrenar en `RESULTADOS_VALIDACION_V2.md`. Las dependencias de `requirements.txt` tienen limites minimos, no versiones fijadas: los resultados pueden variar entre versiones y equipos.
-
-Alternativamente, desde la raiz del proyecto puedes activar el entorno:
+Desde la raíz del proyecto:
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe thesis_experiment.py --stage all
+.\.venv\Scripts\python.exe audit_explainability.py --run latest
+.\.venv\Scripts\python.exe characterize_thesis.py --run latest
+.\.venv\Scripts\python.exe show_results.py --thesis-run latest --details
 ```
 
-Si PowerShell bloquea `project.ps1`, habilitalo solamente para la terminal actual:
+También puedes usar `.\project.ps1 thesis-complete`.
+El entrenamiento puede tardar. No lances corridas simultáneas si usas `latest`.
+Cada ejecución nueva conserva su identificador; los hashes protegen las
+configuraciones, fuentes, datos y modelos congelados.
+
+Con los artefactos originales ya presentes, muestra la corrida registrada sin
+volver a entrenar:
 
 ```powershell
-Set-ExecutionPolicy -Scope Process Bypass
+.\.venv\Scripts\python.exe show_results.py --thesis-run thesis_v1_20261012_154354 --details
+.\.venv\Scripts\python.exe audit_explainability.py --run thesis_v1_20261012_154354
+.\.venv\Scripts\python.exe dashboard_app.py --no-prepare --port 8766
 ```
 
-## Flujo recomendado
+Abre http://127.0.0.1:8766/#resultados. El panel presenta predicciones guardadas,
+subgrafos reales y animaciones esquemáticas del funcionamiento de los modelos.
+No entrena modelos. Si falta la caché, inicia sin `--no-prepare`; requiere
+los CSV y una corrida completa. `--rebuild-cache` reconstruye los ejemplos.
 
-### 1. Validar el proyecto
+## Distribución del código
 
-```powershell
-.\project.ps1 validate
+```text
+configs/                  Configuraciones de las rutas anteriores
+data/raw/                 CSV originales (no se publican)
+src/data/                 Carga, particiones temporales y preprocesamiento
+src/graph/                Relaciones causales y subgrafos
+src/models/               Baseline, AE, GraphSAGE e híbrido
+src/training/             Pérdidas, entrenamiento y mini-lotes exactos
+src/evaluation/           Métricas
+src/explainability/       SHAP del híbrido real con contexto fijo
+tests/                    Pruebas automáticas
+dashboard/                Interfaz y animaciones
+docs/                     Guía de exposición y scripts de generación
+reports/                  Únicos resultados publicados de referencia
+outputs/                  Artefactos completos locales (no se publican)
+thesis_experiment.py       Protocolo actual: congelar, entrenar, evaluar, auditar
+characterize_thesis.py     Caracterización de los períodos utilizados
+audit_explainability.py    Auditoría de resultados y SHAP
+show_results.py           Lectura de métricas sin reentrenar
+dashboard_app.py           Servidor local del panel
+project.ps1               Comandos simplificados para PowerShell
 ```
 
-La suite actual contiene 15 pruebas.
+AP es Average Precision, no accuracy. Precision, Recall y F1 usan el umbral
+elegido en validación; el punto operativo de falsas alarmas es otro umbral.
+La media de F1 no se calcula a partir de Precision y Recall promedios.
 
-### 2. Explorar los datos
+SHAP explica atributos transformados del nodo objetivo con sus vecinos y
+aristas fijos. El ranking usa 16 casos aleatorios por dataset; cuatro casos
+adicionales ilustran TP, FP, FN y TN. No es atribución causal ni de aristas.
 
-```powershell
-.\project.ps1 eda-ieee -Rows 100000
-.\project.ps1 eda-paysim -Rows 100000
-```
-
-El EDA muestra desbalance, monto, fraude por tipo de operacion o producto y datos faltantes. Los JSON quedan en:
-
-- `outputs/experiment_1_ieee/eda/eda_summary.json`
-- `outputs/experiment_2_paysim/eda/eda_summary.json`
-
-### 3. Hacer una prueba tecnica rapida
-
-```powershell
-.\project.ps1 train-ieee -Rows 10000 -Epochs 2 -Seed 42
-.\project.ps1 train-paysim -Rows 30000 -Epochs 2 -Seed 42
-.\project.ps1 results
-```
-
-Estas corridas verifican que todo funciona, pero no son resultados finales de tesis.
-
-### 4. Entrenar una corrida de desarrollo
-
-```powershell
-.\project.ps1 train-ieee -Rows 100000 -Epochs 30 -Seed 42
-.\project.ps1 train-paysim -Rows 300000 -Epochs 30 -Seed 42
-.\project.ps1 results
-```
-
-Para reproducir la ablacion estricta sin saldos:
-
-```powershell
-.\project.ps1 train-paysim-strict -Rows 300000 -Epochs 30 -Seed 42
-.\project.ps1 results-strict
-```
-
-### 5. Evaluar estabilidad para la tesis
-
-Cada benchmark repite el experimento con semillas 42, 52 y 62, y presenta media y desviacion estandar:
-
-```powershell
-.\project.ps1 benchmark-ieee -Rows 100000 -Epochs 30
-.\project.ps1 benchmark-paysim -Rows 300000 -Epochs 30
-```
-
-Puede tardar considerablemente en CPU. Para resultados definitivos, aumenta filas y epocas segun la memoria disponible y documenta esos valores. El pipeline actual trabaja con grafos completos en memoria; no se debe intentar cargar los 6.3 millones de filas de PaySim sin implementar muestreo de vecindarios o entrenamiento por bloques.
-
-## Como interpretar los resultados
-
-La metrica principal es **AUC-PR**, porque el fraude es muy poco frecuente. Tambien deben reportarse:
-
-- `Recall`: porcentaje de fraudes reales detectados.
-- `Precision`: porcentaje de alertas que realmente eran fraude.
-- `F1`: equilibrio entre precision y recall.
-- `FP/1000`: falsas alertas por cada 1000 operaciones legitimas; menor es mejor.
-- `AUC-ROC`: separacion global de clases, como metrica secundaria.
-
-No elijas un modelo solamente por recall: puede detectar muchos fraudes generando demasiadas falsas alarmas. Para la conclusion, prioriza AUC-PR y F1, y revisa el costo operativo con FP/1000.
-
-## Controles contra fuga de informacion
-
-- Division cronologica 70/15/15 para entrenamiento, validacion y prueba.
-- Preprocesamiento ajustado solo con entrenamiento.
-- Umbral de clasificacion elegido solo en validacion.
-- Metricas calculadas una vez sobre prueba.
-- Grafos causales con aristas de transacciones pasadas hacia la actual.
-- Validacion y prueba conservan el contexto historico anterior sin enviar informacion futura hacia entrenamiento.
-- En PaySim se excluyen `isFlaggedFraud` y los saldos del conjunto principal de caracteristicas.
-- Las inconsistencias de saldo de PaySim quedan desactivadas en el experimento principal: pueden revelar artefactos del simulador y producir resultados perfectos que no generalizan.
-- Los archivos oficiales de prueba de IEEE-CIS no se usan para evaluar porque no tienen etiquetas.
-
-## Archivos producidos
-
-Cada experimento guarda:
-
-- `metrics/prepare_summary.json`: filas, fraude, particiones y tamano del grafo.
-- `metrics/*_metrics.json`: resultado individual de cada modelo.
-- `metrics/comparison_latest.json`: ultima comparacion completa.
-- `metrics/comparison_seed_<semilla>.json`: corrida reproducible por semilla.
-- `checkpoints/*.pt`: pesos entrenados de Autoencoder, GraphSAGE e hibrido.
-
-Los archivos de `data/raw` nunca son sobrescritos.
+Git excluye `.venv`, CSV, matrices, predicciones completas, cachés y checkpoints.
+Se publican código, documentación, reportes numéricos y gráficos actuales.
+La ficha y el artículo académico aún deben alinearse con el protocolo ejecutado.

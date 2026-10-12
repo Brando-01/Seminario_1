@@ -44,7 +44,9 @@ def output_dir(config: dict, category: str) -> Path:
 
 
 def save_json(path: Path, payload: Any) -> None:
-    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    temporary.replace(path)
 
 
 def prepare_experiment(config: dict, max_rows: int | None, sample_mode: str = "prefix") -> PreparedExperiment:
@@ -54,7 +56,12 @@ def prepare_experiment(config: dict, max_rows: int | None, sample_mode: str = "p
     excluded = set(config["data"].get("exclude_features", []))
     excluded.update(bundle.metadata.get("excluded_from_features", []))
     excluded.add(bundle.target_column)
-    preprocessor = TabularPreprocessor(excluded, config["data"].get("missing_threshold", 0.95), tuple(config["data"].get("log_columns", [])), config["data"].get("clip_value"))
+    preprocessor = TabularPreprocessor(
+        excluded, config["data"].get("missing_threshold", 0.95), tuple(config["data"].get("log_columns", [])),
+        config["data"].get("clip_value"), add_missing_indicators=config["data"].get("add_missing_indicators", False),
+        categorical_encoding=config["data"].get("categorical_encoding", "frequency"),
+        max_categories=config["data"].get("max_categories", 16),
+    )
     features = {
         "train": preprocessor.fit_transform(partitions.train),
         "validation": preprocessor.transform(partitions.validation),
@@ -94,7 +101,7 @@ def prepare_experiment(config: dict, max_rows: int | None, sample_mode: str = "p
         "raw_rows": int(len(bundle.frame)),
         "raw_columns": int(len(bundle.frame.columns)),
         "model_feature_count": int(features["train"].shape[1]),
-        "retained_feature_columns": preprocessor.numeric_columns + preprocessor.categorical_columns,
+        "retained_feature_columns": preprocessor.output_columns,
         "splits": {
             "train": split_summary(partitions.train, bundle.target_column, bundle.time_column),
             "validation": split_summary(partitions.validation, bundle.target_column, bundle.time_column),

@@ -1,6 +1,6 @@
 param(
     [Parameter(Position = 0)]
-    [ValidateSet("help", "validate", "eda-ieee", "eda-paysim", "prepare-ieee", "prepare-paysim", "train-ieee", "train-paysim", "train-paysim-strict", "benchmark-ieee", "benchmark-paysim", "results", "results-strict")]
+    [ValidateSet("help", "validate", "eda-ieee", "eda-paysim", "prepare-ieee", "prepare-paysim", "train-ieee", "train-paysim", "train-paysim-strict", "benchmark-ieee", "benchmark-paysim", "results", "results-strict", "thesis-complete", "thesis-results", "thesis-audit")]
     [string]$Action = "help",
     [int]$Rows = 0,
     [int]$Epochs = 10,
@@ -17,7 +17,7 @@ Push-Location $ProjectRoot
 try {
     switch ($Action) {
         "validate" {
-            & $Python -m pytest -q -p no:cacheprovider
+            & $Python -m pytest tests -q -p no:cacheprovider
         }
         "eda-ieee" {
             if ($Rows -le 0) { $Rows = 100000 }
@@ -73,6 +73,21 @@ try {
         "results-strict" {
             & $Python show_results.py --experiment paysim-strict --details
         }
+        "thesis-complete" {
+            & $Python thesis_experiment.py --stage all
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            & $Python audit_explainability.py --run latest
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            & $Python characterize_thesis.py --run latest
+        }
+        "thesis-results" {
+            & $Python show_results.py --thesis-run latest --details
+        }
+        "thesis-audit" {
+            & $Python thesis_experiment.py --stage audit --run latest
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            & $Python audit_explainability.py --run latest
+        }
         default {
             Write-Host "Comandos disponibles:"
             Write-Host "  .\project.ps1 validate"
@@ -87,6 +102,9 @@ try {
             Write-Host "  .\project.ps1 benchmark-paysim -Rows 300000 -Epochs 30"
             Write-Host "  .\project.ps1 results"
             Write-Host "  .\project.ps1 results-strict"
+            Write-Host "  .\project.ps1 thesis-complete   (nueva corrida, puede tardar)"
+            Write-Host "  .\project.ps1 thesis-results    (solo leer resultados)"
+            Write-Host "  .\project.ps1 thesis-audit"
         }
     }
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

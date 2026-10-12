@@ -72,3 +72,14 @@ def test_hybrid_search_report_uses_plain_percentages_by_default():
     assert "| ae_pretrained (elegida) | 43.00 |" in report
     assert "| 49.00 | 84.00 | 50.00 | 45.00 | 47.00 | 42.00 | 12.00 |" in report
     assert "test historico ya habia sido inspeccionado" in report
+
+
+def test_minibatch_report_compares_two_models_and_separates_times():
+    rows = [_row(42, "baseline", 0.60, 0.3), _row(42, "hybrid", 0.55, 0.4)]
+    for row in rows:
+        row.update(seconds=12.0, inference_seconds=0.8)
+    report = render_validation_report(rows)
+    assert "Mayor AP media observada: Baseline tabular" in report
+    assert "Hibrido - baseline: -5.00 puntos porcentuales." in report
+    assert "hibrido - GNN" not in report
+    assert "| Hibrido GNN-AE | 12.00 | 0.80 |" in report

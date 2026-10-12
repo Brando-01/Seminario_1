@@ -46,6 +46,7 @@ def render_validation_report(rows: list[dict], summaries: dict | None = None, sh
         "AP = average precision (precision promedio), no accuracy ni area PR trapezoidal.",
         "Cada celda muestra el promedio de las semillas como porcentaje, sin +/-.",
         "La variacion entre semillas se puede consultar por separado; comparten el mismo test.",
+        "F1 es la media de los F1 individuales, no el F1 calculado a partir de Precision y Recall medios.",
         "",
     ]
     if show_variability:
@@ -76,18 +77,21 @@ def render_validation_report(rows: list[dict], summaries: dict | None = None, sh
             cells = [_format_metric([row["metrics"][key] for row in model_rows], show_variability=show_variability) for key, _ in METRICS]
             lines.append(f"| {MODEL_LABELS.get(model, model)} | " + " | ".join(cells) + " |")
         lines.append("")
-        if all(model in by_model for model in ("baseline", "gnn", "hybrid")):
+        if all(model in by_model for model in ("baseline", "hybrid")):
             mean_ap = {
                 model: np.mean([row["metrics"]["auc_pr"] for row in model_rows])
                 for model, model_rows in by_model.items()
             }
             winner = max(mean_ap, key=mean_ap.get)
-            lines.append(
+            comparison = (
                 f"Mayor AP media observada: {MODEL_LABELS.get(winner, winner)}. "
                 f"Hibrido - baseline: {100 * (mean_ap['hybrid'] - mean_ap['baseline']):+.2f} "
-                f"puntos porcentuales; hibrido - GNN: "
-                f"{100 * (mean_ap['hybrid'] - mean_ap['gnn']):+.2f} puntos porcentuales."
+                f"puntos porcentuales"
             )
+            if "gnn" in mean_ap:
+                comparison += (f"; hibrido - GNN: "
+                               f"{100 * (mean_ap['hybrid'] - mean_ap['gnn']):+.2f} puntos porcentuales")
+            lines.append(comparison + ".")
             lines.append("")
         if all("operating_metrics" in row for model_rows in by_model.values() for row in model_rows):
             lines.extend([
@@ -100,6 +104,20 @@ def render_validation_report(rows: list[dict], summaries: dict | None = None, sh
                 recall = _format_metric([row["operating_metrics"]["recall"] for row in model_rows], show_variability=show_variability)
                 fp = _format_metric([row["operating_metrics"]["false_positives_per_1000"] for row in model_rows], 1.0, show_variability)
                 lines.append(f"| {MODEL_LABELS.get(model, model)} | {recall} | {fp} |")
+            lines.append("")
+        if all("seconds" in row and "inference_seconds" in row
+               for model_rows in by_model.values() for row in model_rows):
+            lines.extend([
+                "Tiempos locales medios por semilla; inferencia sobre toda la particion de test.",
+                "Entrenamiento incluye preentrenamiento AE; excluye preparacion, busqueda y validacion.",
+                "| Modelo | Entrenamiento (s) | Inferencia test (s) |",
+                "|---|---:|---:|",
+            ])
+            for model in selected:
+                model_rows = by_model[model]
+                train_time = _format_metric([row["seconds"] for row in model_rows], 1.0, show_variability)
+                inference_time = _format_metric([row["inference_seconds"] for row in model_rows], 1.0, show_variability)
+                lines.append(f"| {MODEL_LABELS.get(model, model)} | {train_time} | {inference_time} |")
             lines.append("")
     lines.extend([
         "No se demuestra superioridad estadistica con semillas sobre un solo periodo de test.",
